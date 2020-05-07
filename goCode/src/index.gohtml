@@ -1,0 +1,310 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="estilos.css">
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script>     
+            function myFunction() {
+                var x = document.getElementById('FileLoader');
+                    if (x.className === "d-none") {
+                        x.classList.remove("d-none");
+                        x.classList.add("d-block");
+                    } else {
+                        x.classList.remove("d-block");
+                        x.classList.add("d-none");
+                    }
+                } 
+            function Salir(){
+                self.close();
+            }
+        </script>
+        <script>
+            var button='<button class="close" type="button" title="Remove this page">×</button>';
+           var tabID = 1;
+           function resetTab(){
+               var tabs=$("#tab-list li:not(:first)");
+               var len=1
+               $(tabs).each(function(k,v){
+                   len++;
+                   $(this).find('a').html('Tab ' + len + button);
+               })
+               tabID--;
+           }           
+           $(document).ready(function() {
+               $('#btn-add-tab').click(function() {
+                   tabID++;
+                   $('#tab-list').append($('<li><a href="#tab' + tabID + '" role="tab" data-toggle="tab" type="button" class="btn btn-info" style="margin-right: 1px;"><span>Tab ' + tabID + '</span> <span class="glyphicon glyphicon-pencil text-muted edit"></span> <button class="close" type="button" title="Remove this page">×</button></a></li>'));
+                   $('#tab-content').append($('<div class="tab-pane fade" id="tab' + tabID + '"><div id="left"><textarea style="background: url(http://i.imgur.com/2cOaJ.png);background-color: #f1f1f1;background-attachment: local;background-repeat: no-repeat;padding-left: 35px;padding-top: 10px;border-color:#ccc;color: rgb(0, 0, 0); font-size: smaller;"id="entrada' + tabID + '" class="entrada"></textarea><button class="boton" onclick="EnviarEntrada(entrada' + tabID + '.value, consola1, consola2, consola3, variables);">Analizar Entrada</button></div>'));
+                   $(".edit").click(editHandler);
+               });
+               
+               $('#tab-list').on('click', '.close', function() {
+                   var tabID = $(this).parents('a').attr('href');
+                   $(this).parents('li').remove();
+                   $(tabID).remove();
+           
+                   //display first tab
+                   var tabFirst = $('#tab-list a:first');
+                   resetTab();
+                   tabFirst.tab('show');
+               });
+           
+               var list = document.getElementById("tab-list");
+           });
+           
+           var editHandler = function() {
+             var t = $(this);
+             t.css("visibility", "hidden");
+             $(this).prev().attr("contenteditable", "true").focusout(function() {
+               $(this).removeAttr("contenteditable").off("focusout");
+               t.css("visibility", "visible");
+             });
+           };
+           
+           $(".edit").click(editHandler);
+           </script>
+           <script>     
+           function printPython(){
+             var DownloadLink = document.getElementById("downloadFile");
+             var newFile = new File([consola1.value], "SalidaPython.py");
+             var direccion = window.URL.createObjectURL(newFile);
+             DownloadLink.href = direccion;
+             DownloadLink.download = "SalidaPython.py";
+             DownloadLink.click();
+           } 
+           function printHTML(){
+             var DownloadLink = document.getElementById("downloadFile");
+             var newFile = new File([consola2.value], "SalidaHTML.html");
+             var direccion = window.URL.createObjectURL(newFile);
+             DownloadLink.href = direccion;
+             DownloadLink.download = "SalidaHTML.html";
+             DownloadLink.click();
+           } 
+           function SaveFile(){
+             var NewDocumentName = prompt("Ingresa el nombre del nuevo documento");
+             if(NewDocumentName=="" || NewDocumentName==null){
+               alert("No se ha guardado el archivo.");
+             }else{
+                  var DownloadLink = document.getElementById("downloadFile");
+                  if(tabID==1){
+                    var TextFile =  document.getElementById("entrada");
+                    var newFile = new File([TextFile.value], NewDocumentName+".cs");
+                  }else{
+                    var TextFile =  document.getElementById("entrada"+tabID);
+                    var newFile = new File([TextFile.value], NewDocumentName+".cs");
+                  }
+                  var direccion = window.URL.createObjectURL(newFile);
+                  DownloadLink.href = direccion;
+                  DownloadLink.download = NewDocumentName+".cs";
+                  DownloadLink.click();
+             }
+             
+           } 
+            </script> 
+  <style>
+      .content{
+      background-color: #c0a247;
+      width: 100%;
+      height: 90%;
+    }
+    .left{      
+      background-color: #FFFF;
+      width: 50%;
+      height: 50%;
+      float:left;
+    }
+    .right{      
+      background-color: #0000;
+      width: 50%;
+      height: 56%;
+      float:right;
+    }
+    .down{      
+      background-color: #F232;
+      width: 100%;
+      height: 35%;
+      float:down;
+    }
+    .dropbtn {
+        background-color: #c0a247;
+        color: white;
+        padding: 16px;
+        font-size: 16px;
+        border: none;
+      }
+      
+      .dropdown {
+        position: relative;
+        display: inline-block;
+      }
+      .FileButton{
+          
+        display: none;
+      }
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+      }
+      
+        .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        }
+      
+        .dropdown-content a:hover {
+          background-color: #ddd;
+
+        }
+        .FileLoader:hover .FileButton{
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+          }
+      
+      .dropdown:hover .dropdown-content {display: block;}
+      
+      .dropdown:hover .dropbtn {background-color: #ffd868;}
+      /* Style the tab */
+    .tab {
+        overflow: hidden;
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
+      }
+      
+      /* Style the buttons inside the tab */
+      .tab button {
+        background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: 0.3s;
+        font-size: 17px;
+      }
+      /* Change background color of buttons on hover */
+      .tab button:hover {
+        background-color: #ddd;
+      }
+      
+      /* Create an active/current tablink class */
+      .tab button.active {
+        background-color: #ccc;
+      }
+      
+      /* Style the tab content */
+      .tabcontent {
+        display: none;
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-top: none;
+      }
+  </style>
+</head>
+{{/* <form >
+<label for="fer">fisrt name </label>
+<input type="text" name ="firster" id="fer">
+<label for="ler">last name </label>
+<input type="text" name ="laster" id="ler">
+<input type="submit">
+</form> */}}
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="#">Antennae Java</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <svg class="bi bi-archive-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M12.643 15C13.979 15 15 13.845 15 12.5V5H1v7.5C1 13.845 2.021 15 3.357 15h9.286zM6 7a.5.5 0 000 1h4a.5.5 0 000-1H6zM.8 1a.8.8 0 00-.8.8V3a.8.8 0 00.8.8h14.4A.8.8 0 0016 3V1.8a.8.8 0 00-.8-.8H.8z" clip-rule="evenodd"/>
+                      </svg>
+                  </a>
+                  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="#" id="btn-add-tab">Nuevo Documento en blanco</a>
+                    <a class="dropdown-item" href="#" id="UploadFile" onclick="myFunction()">Abrir Documento</a>
+                    <a class="dropdown-item" href="#" id="UploadFile" onclick="SaveFile()">Guardar</a>
+                    <a class="dropdown-item" href="#" id="UploadFile" onclick="SaveFile()">Guardar Como</a>
+                  </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <svg class="bi bi-files" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M3 2h8a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V4a2 2 0 012-2zm0 1a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V4a1 1 0 00-1-1H3z" clip-rule="evenodd"/>
+                            <path d="M5 0h8a2 2 0 012 2v10a2 2 0 01-2 2v-1a1 1 0 001-1V2a1 1 0 00-1-1H5a1 1 0 00-1 1H3a2 2 0 012-2z"/>
+                          </svg>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                      <a class="dropdown-item" href="#" onclick="printPython()">Reportes</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="#" onclick="printHTML()">Salida HTML</a>
+                    </div>
+                  </li>
+              </ul>
+            </div>
+            </div>
+          <div id="FileLoader" class="d-none">
+              <input type="file" id="fileinput">
+              <script type="text/javascript">
+                function readSingleFile(evt) {
+                  var f = evt.target.files[0];               
+                  if (f) {
+                    var r = new FileReader();
+                    r.onload = function(e) { 
+                        var contents = e.target.result;
+                        document.getElementById('entrada'+tabID).value=contents;
+                        var els = document.querySelectorAll("a[href='#tab"+tabID+"']");
+                        els[0].textContent = f.name;
+                        
+                    }
+                    r.readAsText(f);
+                    myFunction();
+                  } else { 
+                    alert("No se pudo cargar el archivo, inténtalo de nuevo.");
+                  }
+                }
+              
+                document.getElementById('fileinput').addEventListener('change', readSingleFile, false);
+              </script>
+         
+    </nav>
+    <form action = "/analizar" method="POST">
+    <div class="content">
+    <div class="left"><textarea name="original" style="width:100%; height:100%;"></textarea></div>
+    <div class="right">
+                    <!--Nav tabs -->
+                    <ul id="tab-list" class="nav nav-tabs" role="tablist">
+  
+                       <li></p></li>
+               
+                        <li class="active"><a href="#tab1" role="tab" data-toggle="tab" type="button" class="btn btn-info" style="margin-right: 1px;"><span>Tab 1 </span><span class="glyphicon glyphicon-pencil text-muted edit"></span></a></li>
+                    </ul>        
+                   <!--  Tab panes  -->
+                     <div id="tab-content" class="tab-content" >
+                          <div class="tab-pane fade in active" id="tab1">
+                              <div>
+                                <textarea id="entrada1" name="entrada1"class="entrada" style="width:100%; height:80%;"></textarea>
+                              </div>
+                          </div>                     
+                      </div>
+                 </div>
+    <input type="submit">
+</form>              
+    <div class="down"></div>
+    
+    </div>
+    
+</body>
+</html>
