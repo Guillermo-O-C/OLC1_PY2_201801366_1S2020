@@ -21,18 +21,22 @@ const TIPO_OPERACIONES = {
 };
 
 const SENTENCIAS = {
-    IMPRIMIR: 'S_IMMPRIMIR',
+    ASIGNACION: 'S_ASIGNACION',
+    DECLARACION:    'S_DECLARACION',
+    IMPORT: 'S_IMPORT',
     IF: 'S_IF',
     ELSE_IF:    'S_ELSE_IF',
     SWITCH: 'S_SWITCH',
     WHILE:  'S_WHILE',
     DO_WHILE:   'S_DO_WHILE',
     FOR:    'S_FOR',
+    FUNCION: 'S_FUNCION',
+    MAIN:   'S_MAIN',
     RETURN: 'S_RETURN',
     CONTINUE:  'S_CONTINUE',
     BREAK:  'S_BREAK',
-    DECLARACION:    'S_DECLARACION',
-    ASIGNACION: 'S_ASIGNACION'
+    IMPRIMIR: 'S_IMPRIMIR',
+    
 }
 
 function nuevaOperacion(operandoIzq, OperandoDer, tipo){
@@ -50,7 +54,63 @@ const InstruccionesAPI = {
 	 * @param {*} Der 
 	 * @param {*} tipo 
 	 */
-	nuevoOperacionBinaria: function(Izq, Der, tipo) {
+	nuevaOperacionBinaria: function(Izq, Der, tipo) {
 		return nuevaOperacion(Izq, Der, tipo);
-	},
+    },
+    nuevaOperacionUnaria: function(izq, tipo){
+        return nuevaOperacion(izq, undefined, tipo);
+    },
+    nuevoValor: function(valor, tipo){
+        return{
+            tipo:tipo,
+            valor:valor
+        };
+    },
+    nuevoImprimir: function(cadena){
+        return{
+            tipo:TIPO_OPERACIONES.IMPRIMIR,
+            cadena:cadena
+        };
+    },
+    nuevoWhile: function(logica,  sentencias){
+        return{
+           tipo:TIPO_OPERACIONES.WHILE,
+           logica:logica,
+           sentencias:sentencias
+        };
+    },
+    nuevaDeclaracion: function(id){
+        return{
+            tipo:TIPO_OPERACIONES.DECLARACION,
+            id:id
+        };
+    },
+    nuevaAsignacion: function(id, expresion){
+        return{
+            tipo:TIPO_OPERACIONES.ASIGNACION,
+            id:id,
+            expresion:expresion
+        };
+    },
+    nuevoIf: function(logica, sentencias){
+        return{
+            tipo:TIPO_OPERACIONES.IF,
+            logica:logica,
+            sentencias:sentencias
+        };
+    },
+    nuevoIfElse: function(logica, sentenciasSI, sentenciasNO){
+        return{
+            tipo:TIPO_OPERACIONES.ELSE_IF,
+            logica:logica,
+            TRUE:sentenciasSI,
+            FALSE:sentenciasNO
+        };
+    }
+
 }
+
+module.exports.TIPO_OPERACIONES =  TIPO_OPERACIONES;
+module.exports.TIPO_VALOR =  TIPO_VALOR;
+module.exports.SENTENCIAS =  SENTENCIAS;
+module.exports.InstruccionesAPI = InstruccionesAPI;
