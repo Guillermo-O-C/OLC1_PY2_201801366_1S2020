@@ -38,9 +38,8 @@
 [0-9]+\b return 'ENTERO';
 ([a-zA-Z])[a-zA-Z0-9_]* return 'IDENTIFICADOR';
 \s+ {}                                                                             //Ignora los espacios en blanco
-/*
-"//".*                                                                         //Comentario de una línea
-[/][*][^*]*[*]+([^/*][^*]*[*]+)*[/]                                             //Comentario multilínea\\n "SALTO";*/
+//"/""/".*\n                                                                        //Comentario de una línea
+//[/][*][^*]*[*]+([^/*][^*]*[*]+)*[/]                                             //Comentario multilínea\\n "SALTO";*/
 \\"n" return 'SALTO';
 \\"t" return 'TAB';
 \\"r" return 'RETORNO_CARRO';
@@ -108,6 +107,12 @@ instrucciones
 	| instruccion               { $$ = [$1]; }
 ;
 instruccion
-   : R_SYSTEM PUNTO R_OUT PUNTO R_PRINTLN ABRIR_PARENTESIS CADENA CERRAR_PARENTESIS PUNTO_COMA                        { $$ = instruccionesAPI.nuevoImprimir($3); }
-   | error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); }
+   	: R_SYSTEM PUNTO R_OUT PUNTO R_PRINTLN ABRIR_PARENTESIS CADENA CERRAR_PARENTESIS PUNTO_COMA { $$ = instruccionesAPI.nuevoImprimir($3); }
+	| R_CLASS IDENTIFICADOR ABRIR_LLAVE classBody  CERRAR_LLAVE {$$=instruccionesAPI.nuevaClase($2, $4);}
+   	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); }
+;
+classBody
+	: declaracion,
+	| asignacion,
+	| declaracion
 ;

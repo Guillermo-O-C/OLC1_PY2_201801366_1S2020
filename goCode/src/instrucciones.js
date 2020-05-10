@@ -21,6 +21,7 @@ const TIPO_OPERACIONES = {
 };
 
 const SENTENCIAS = {
+    CLASE: 'S_CLASE',
     ASIGNACION: 'S_ASIGNACION',
     DECLARACION:    'S_DECLARACION',
     IMPORT: 'S_IMPORT',
@@ -106,6 +107,13 @@ const InstruccionesAPI = {
             TRUE:sentenciasSI,
             FALSE:sentenciasNO
         };
+    },
+    nuevaClase: function(idenficador, Sentencias){
+        return{
+            tipo:TIPO_OPERACIONES.CLASE,
+            id:idenficador,
+            sentencias:Sentencias
+        }
     }
 
 }

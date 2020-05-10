@@ -1,0 +1,73 @@
+P_comentario ->   // *cualquier cosa* \n
+                | /* *cualuier cosa* */
+P_Tipo_Dato ->    int
+                | double
+                | boolean
+                | char
+                | String
+P_GeneralBody->   P_comentario 
+                | P_Imports
+                | P_Definicion_clase
+P_Definicion_clase -> class id { P_contenidoClase }
+P_Imports -> import id ;
+P_Declaracion_Var ->  P_Tipo_Dato P_lista_ID P_Declaracion_Var'
+P_Declaracion_Var' ->   ;
+                        | = expresion;
+P_Asignacion -> id 
+P_Asignacion' -> (P_Argumentos);
+                | = expresion;
+P_Argumentos -> expresion P_Argumentos'
+P_Argumentos' -> , expresion P_Argumentos'
+P_if -> if ( P_condicion ) { P_sentecias } P_if'
+P_if'-> else P_if''
+        | epsilon
+P_if'' ->   if ( P_condicion ) { P_sentecias } P_if'
+            | { P_sentecias }
+P_Switch ->     switch ( expresion ) { P_casos P_default}
+P_casos ->  case expresion : sentencias 
+P_default ->    default : sentencias
+P_Do_While ->   do { sentencias } while ( P_condicion )
+P_While ->  while( P_condicion ) { sentencias }
+P_For ->    for(P_for_var condicion ; id P_for_change ){ sentencias }
+P_for_var ->    P_Tipo_Dato id = expresion ;
+                | id = expresion ;
+P_for_change -> ++
+                |--
+P_Declaracion_funciones ->  void P_Declaracion_funciones
+                            | P_Tipo_Dato id(P_Parametros) { sentencias}  
+P_Declaracion_funciones' -> id (P_Parametros){ sentencias }
+                            | main() { sentencias }
+P_Parametros -> P_Tipo_Dato id P_Parametros'
+P_Parametros' -> , P_Tipo_Dato id P_Parametros'
+P_Print -> System.out.P_Print'(expresion);
+P_Print' -> println
+            |print
+expresion -> TE'
+E'-> +FT'
+    | - FT'
+T->FT'
+T'-> *FT'
+    | /FT'
+F-> (expresion)
+    |id P_llamada
+    | entero
+    | decimal
+    | cadena
+    | true
+    | false
+P_llamada -> (P_Argumentos)
+P_contenidoClase -> P_comentario
+                    | P_Declaracion_funciones
+                    | P_Declaracion_Var
+                    | P_Asignacion
+sentencias ->   P_Declaracion_Var
+                | P_Asignacion
+                | P_if
+                | P_Switch
+                | P_While
+                | P_Do_While
+                | P_For
+                | break;
+                | return expresion ;
+                | continue ;
+                | P_Print
