@@ -72,6 +72,7 @@
 ";" return 'PUNTO_COMA';
 ":" return 'DOS_PUNTOS';
 "." return 'PUNTO';
+"," return 'COMA';
 
 <<EOF>>                 return 'EOF';
 
@@ -107,12 +108,70 @@ instrucciones
 	| instruccion               { $$ = [$1]; }
 ;
 instruccion
-   	: R_IMPORT IDENTIFICADOR PUNTO_COMA { $$ = instruccionesAPI	.nuevoImport($2);}
-	| R_CLASS IDENTIFICADOR ABRIR_LLAVE classBody  CERRAR_LLAVE {$$=instruccionesAPI	.nuevaClase($2, $4);}
+   	: R_IMPORT IDENTIFICADOR PUNTO_COMA { $$ = instruccionesAPI.nuevoImport($2);}
+	| R_CLASS IDENTIFICADOR ABRIR_LLAVE classBody  CERRAR_LLAVE {$$=instruccionesAPI.nuevaClase($2, $4);}
    	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); }
 ;
 classBody
-	: comentario ,
-	| asignacion,
-	| declaracion
+	: classBody classActions { $1.push($2); $$ = $1; }
+	| classActions	 { $$ = [$1]; }
+;
+
+classActions
+	: declaracion_funcion 
+	| declaracion_var
+	| asignacion
+;
+
+declaracion_funcion
+	: R_VOID IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE 
+	| R_VOID R_MAIN ABRIR_PARENTESIS CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE
+	| R_INTEGER IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE 
+	| R_DOUBLE IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE 
+	| R_STRING IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE 
+	| R_BOOLEAN IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE 
+	| R_CHAR IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE 
+;
+parametros
+	: R_INTEGER IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2);}
+	| R_DOUBLE IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2);}
+	| R_STRING IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2);}
+	| R_BOOLEAN IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2);}
+	| R_CHAR IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2);}
+;
+parametros_p
+	: COMA R_INTEGER IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3);}
+	| COMA R_DOUBLE IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3);}
+	| COMA R_STRING IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3);}
+	| COMA R_BOOLEAN IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3);}
+	| COMA R_CHAR IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3);}
+;
+sentencias
+	: sentencias  sentencia { $1.push($2); $$ = $1; }
+	| sentencia { $$ = [$1]; }
+;
+sentencia
+	: declaracion_var { $$ = $1; }
+;
+declaracion_var
+	: R_INTEGER IDENTIFICADOR defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
+	| R_DOUBLE IDENTIFICADOR defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
+	| R_STRING IDENTIFICADOR defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
+	| R_BOOLEAN IDENTIFICADOR defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
+	| R_CHAR IDENTIFICADOR defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
+;
+defincion_var
+	: IGUAL expresion { $$ = $2; }
+	| { $$ = null; }
+;
+expresion
+	: MENOS expresion %prec UMENOS				{ $$ = instruccionesAPI.nuevoOperacionUnaria($2, TIPO_OPERACION.NEGATIVO); }
+	| expresion MAS expresion			{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.SUMA); }
+	| expresion MENOS expresion		{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.RESTA); }
+	| expresion MULTIPLICACION expresion			{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.MULTIPLICACION); }
+	| expresion DIVISION expresion	{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.DIVISION); }
+	| ABRIR_PARENTESIS expresion CERRAR_PARENTESIS					{ $$ = $2; }
+	| ENTERO											{ $$ = instruccionesAPI.nuevoValor(Number($1), TIPO_VALOR.NUMERO); }
+	| DECIMAL											{ $$ = instruccionesAPI.nuevoValor(Number($1), TIPO_VALOR.NUMERO); }
+	| IDENTIFICADOR										{ $$ = instruccionesAPI.nuevoValor($1, TIPO_VALOR.IDENTIFICADOR); }
 ;

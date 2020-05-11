@@ -1,11 +1,11 @@
 const TIPO_VALOR = {
-    NUMERO: 'VAL_NUMERO',
-    DECIMAL: 'VAL_DECIMAL',
-    IDENTIFICADOR: 'VAL_IDENTIFICADOR',
-    CADENA: 'VAL_CADENA',
-    CARACTER: 'VAL_CARACTER',
-    VERDADERO: 'VAL_VERDADEDRO',
-    FALSO: 'VAL_FALSO'
+    NUMERO: 'NUMERO',
+    DECIMAL: 'DECIMAL',
+    IDENTIFICADOR: 'IDENTIFICADOR',
+    CADENA: 'CADENA',
+    CARACTER: 'CARACTER',
+    TRUE: 'TRUE',
+    TRUE: 'TRUE'
 }
 const TIPO_OPERACIONES = {
     SUMA:   'OP_SUMA',
@@ -21,23 +21,24 @@ const TIPO_OPERACIONES = {
 };
 
 const SENTENCIAS = {
-    CLASE: 'S_CLASE',
-    ASIGNACION: 'S_ASIGNACION',
-    DECLARACION:    'S_DECLARACION',
-    IMPORT: 'S_IMPORT',
-    IF: 'S_IF',
-    ELSE_IF:    'S_ELSE_IF',
-    SWITCH: 'S_SWITCH',
-    WHILE:  'S_WHILE',
-    DO_WHILE:   'S_DO_WHILE',
-    FOR:    'S_FOR',
-    FUNCION: 'S_FUNCION',
-    MAIN:   'S_MAIN',
-    RETURN: 'S_RETURN',
-    CONTINUE:  'S_CONTINUE',
-    BREAK:  'S_BREAK',
-    IMPRIMIR: 'S_IMPRIMIR',
-    COMENTARIO: 'S_COMENTARIO'
+    CLASE: 'CLASE',
+    ASIGNACION: 'ASIGNACION',
+    DECLARACION:    'DECLARACION',
+    IMPORT: 'IMPORT',
+    IF: 'IF',
+    ELSE_IF:    'ELSE_IF',
+    SWITCH: 'SWITCH',
+    WHILE:  'WHILE',
+    DO_WHILE:   'DO_WHILE',
+    FOR:    'FOR',
+    FUNCION: 'FUNCION',
+    MAIN:   'MAIN',
+    RETURN: 'RETURN',
+    CONTINUE:  'CONTINUE',
+    BREAK:  'BREAK',
+    IMPRIMIR: 'IMPRIMIR',
+    COMENTARIO: 'COMENTARIO',
+    PARAMETRO: 'PARAMETRO'
 }
 
 function nuevaOperacion(operandoIzq, OperandoDer, tipo){
@@ -74,10 +75,12 @@ const instruccionesAPI = {
            sentencias:sentencias
         };
     },
-    nuevaDeclaracion: function(id){
+    nuevaDeclaracion: function(tipo_dato, id, valor){
         return{
             tipo:SENTENCIAS.DECLARACION,
-            id:id
+            tipo_dato: tipo_dato,
+            id:id,
+            valor:valor
         };
     },
     nuevaAsignacion: function(id, expresion){
@@ -118,6 +121,13 @@ const instruccionesAPI = {
     nuevoImport: function(id){
         return{
             tipo:SENTENCIAS.IMPORT,
+            id:id
+        };
+    },
+    nuevoParametro: function(tipo_dato, id){
+        return{
+            tipo:SENTENCIAS.PARAMETRO,
+            tipo_dato:tipo_dato,
             id:id
         };
     }
