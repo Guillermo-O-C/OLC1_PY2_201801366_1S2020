@@ -107,12 +107,12 @@ instrucciones
 	| instruccion               { $$ = [$1]; }
 ;
 instruccion
-   	: R_SYSTEM PUNTO R_OUT PUNTO R_PRINTLN ABRIR_PARENTESIS CADENA CERRAR_PARENTESIS PUNTO_COMA { $$ = instruccionesAPI.nuevoImprimir($3); }
-	| R_CLASS IDENTIFICADOR ABRIR_LLAVE classBody  CERRAR_LLAVE {$$=instruccionesAPI.nuevaClase($2, $4);}
+   	: R_IMPORT IDENTIFICADOR PUNTO_COMA { $$ = instruccionesAPI	.nuevoImport($2);}
+	| R_CLASS IDENTIFICADOR ABRIR_LLAVE classBody  CERRAR_LLAVE {$$=instruccionesAPI	.nuevaClase($2, $4);}
    	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); }
 ;
 classBody
-	: declaracion,
+	: comentario ,
 	| asignacion,
 	| declaracion
 ;

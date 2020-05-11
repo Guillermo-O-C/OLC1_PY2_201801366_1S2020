@@ -72,12 +72,12 @@
   }
 */
 var gramatica = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,5],$V1=[1,4],$V2=[2,5,7];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,7],$V1=[1,4],$V2=[1,5],$V3=[1,6],$V4=[2,5,7,15,17];
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"error":2,"ini":3,"instrucciones":4,"EOF":5,"instruccion":6,"R_SYSTEM":7,"PUNTO":8,"R_OUT":9,"R_PRINTLN":10,"ABRIR_PARENTESIS":11,"CADENA":12,"CERRAR_PARENTESIS":13,"PUNTO_COMA":14,"$accept":0,"$end":1},
-terminals_: {2:"error",5:"EOF",7:"R_SYSTEM",8:"PUNTO",9:"R_OUT",10:"R_PRINTLN",11:"ABRIR_PARENTESIS",12:"CADENA",13:"CERRAR_PARENTESIS",14:"PUNTO_COMA"},
-productions_: [0,[3,2],[4,2],[4,1],[6,9],[6,1]],
+symbols_: {"error":2,"ini":3,"instrucciones":4,"EOF":5,"instruccion":6,"R_SYSTEM":7,"PUNTO":8,"R_OUT":9,"R_PRINTLN":10,"ABRIR_PARENTESIS":11,"CADENA":12,"CERRAR_PARENTESIS":13,"PUNTO_COMA":14,"R_IMPORT":15,"IDENTIFICADOR":16,"R_CLASS":17,"ABRIR_LLAVE":18,"classBody":19,"CERRAR_LLAVE":20,"comentario":21,"asignacion":22,"declaracion":23,"$accept":0,"$end":1},
+terminals_: {2:"error",5:"EOF",7:"R_SYSTEM",8:"PUNTO",9:"R_OUT",10:"R_PRINTLN",11:"ABRIR_PARENTESIS",12:"CADENA",13:"CERRAR_PARENTESIS",14:"PUNTO_COMA",15:"R_IMPORT",16:"IDENTIFICADOR",17:"R_CLASS",18:"ABRIR_LLAVE",20:"CERRAR_LLAVE",21:"comentario",22:"asignacion",23:"declaracion"},
+productions_: [0,[3,2],[4,2],[4,1],[6,9],[6,3],[6,5],[6,1],[19,1],[19,1],[19,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
@@ -96,15 +96,21 @@ case 3:
  this.$ = [$$[$0]]; 
 break;
 case 4:
- this.$ = instruccionesAPI.nuevoImprimir($$[$0-6]); 
+ this.$ = instruccionesAPI	.nuevoImprimir($$[$0-2]); 
 break;
 case 5:
+ this.$ = instruccionesAPI	.nuevoImport($$[$0-1]);
+break;
+case 6:
+this.$=instruccionesAPI	.nuevaClase($$[$0-3], $$[$0-1]);
+break;
+case 7:
  console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); 
 break;
 }
 },
-table: [{2:$V0,3:1,4:2,6:3,7:$V1},{1:[3]},{2:$V0,5:[1,6],6:7,7:$V1},o($V2,[2,3]),{8:[1,8]},o($V2,[2,5]),{1:[2,1]},o($V2,[2,2]),{9:[1,9]},{8:[1,10]},{10:[1,11]},{11:[1,12]},{12:[1,13]},{13:[1,14]},{14:[1,15]},o($V2,[2,4])],
-defaultActions: {6:[2,1]},
+table: [{2:$V0,3:1,4:2,6:3,7:$V1,15:$V2,17:$V3},{1:[3]},{2:$V0,5:[1,8],6:9,7:$V1,15:$V2,17:$V3},o($V4,[2,3]),{8:[1,10]},{16:[1,11]},{16:[1,12]},o($V4,[2,7]),{1:[2,1]},o($V4,[2,2]),{9:[1,13]},{14:[1,14]},{18:[1,15]},{8:[1,16]},o($V4,[2,5]),{19:17,21:[1,18],22:[1,19],23:[1,20]},{10:[1,21]},{20:[1,22]},{20:[2,8]},{20:[2,9]},{20:[2,10]},{11:[1,23]},o($V4,[2,6]),{12:[1,24]},{13:[1,25]},{14:[1,26]},o($V4,[2,4])],
+defaultActions: {8:[2,1],18:[2,8],19:[2,9],20:[2,10]},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
         this.trace(str);
@@ -698,9 +704,9 @@ case 5:return 'R_FALSE';
 break;
 case 6:return 'R_TRUE';
 break;
-case 7:return 'R_CLASS';
+case 7:return 17;
 break;
-case 8:return 'R_IMPORT';
+case 8:return 15;
 break;
 case 9:return 'R_IF';
 break;
@@ -744,7 +750,7 @@ case 28:return 'DECIMAL';
 break;
 case 29:return 'ENTERO';
 break;
-case 30:return 'IDENTIFICADOR';
+case 30:return 16;
 break;
 case 31:
 break;
@@ -794,9 +800,9 @@ case 53:return 'OR';
 break;
 case 54:return 'NOT';
 break;
-case 55:return 'ABRIR_LLAVE';
+case 55:return 18;
 break;
-case 56:return 'CERRAR_LLAVE';
+case 56:return 20;
 break;
 case 57:return 11;
 break;

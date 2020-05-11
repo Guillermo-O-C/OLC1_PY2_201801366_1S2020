@@ -31,7 +31,7 @@ func main() {
 }
 func analizar(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "http://localhost:3000/analizar", http.StatusSeeOther)
 		return
 	}
 	/*
