@@ -84,6 +84,7 @@
 	const TIPO_OPERACION	= require('./instrucciones').TIPO_OPERACION;
 	const TIPO_VALOR 		= require('./instrucciones').TIPO_VALOR;
 	const instruccionesAPI	= require('./instrucciones').instruccionesAPI;
+	var salida=[];
 %}
 
 /* Asociación de operadores y precedencia */
@@ -99,7 +100,9 @@
 ini
 	: instrucciones EOF {
 		// cuado se haya reconocido la entrada completa retornamos el AST
-		return $1;
+		var temporal = salida;
+		salida=[];
+		return {AST: $1, Errores: temporal};
 	}
 ;
 
@@ -110,7 +113,8 @@ instrucciones
 instruccion
    	: R_IMPORT IDENTIFICADOR PUNTO_COMA { $$ = instruccionesAPI.nuevoImport($2);}
 	| R_CLASS IDENTIFICADOR ABRIR_LLAVE classBody  CERRAR_LLAVE {$$=instruccionesAPI.nuevaClase($2, $4);}
-   	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); }
+   	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); 
+	   			salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
 ;
 classBody
 	: classBody classActions { $1.push($2); $$ = $1; }
@@ -118,33 +122,39 @@ classBody
 ;
 
 classActions
-	: declaracion_funcion 
-	| declaracion_var
-	| asignacion
+	: declaracion { $$ = $1; } //not sure
+	| asignacion { $$ = $1; }	//not sure
+;
+declaracion
+	: R_VOID IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE  {$$ = instruccionesAPI.nuevaFuncion($1, $2, $4, $7);}
+	| R_VOID R_MAIN ABRIR_PARENTESIS CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE {$$ = instruccionesAPI.nuevoMain($6);} 
+	| R_INTEGER IDENTIFICADOR declaracion_p { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
+	| R_DOUBLE IDENTIFICADOR declaracion_p { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
+	| R_STRING IDENTIFICADOR declaracion_p { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
+	| R_BOOLEAN IDENTIFICADOR declaracion_p { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
+	| R_CHAR IDENTIFICADOR declaracion_p { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
 ;
 
-declaracion_funcion
-	: R_VOID IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE 
-	| R_VOID R_MAIN ABRIR_PARENTESIS CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE
-	| R_INTEGER IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE 
-	| R_DOUBLE IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE 
-	| R_STRING IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE 
-	| R_BOOLEAN IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE 
-	| R_CHAR IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE 
+declaracion_p
+	: defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaVariable($1);}
+	| ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE  {$$ = instruccionesAPI.nuevaFuncion($2, $5);}
 ;
+
 parametros
-	: R_INTEGER IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2);}
-	| R_DOUBLE IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2);}
-	| R_STRING IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2);}
-	| R_BOOLEAN IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2);}
-	| R_CHAR IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2);}
+	: R_INTEGER IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2, $3);}
+	| R_DOUBLE IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2, $3);}
+	| R_STRING IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2, $3);}
+	| R_BOOLEAN IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2, $3);}
+	| R_CHAR IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2, $3);}
+	| { $$ = "NA"; }
 ;
 parametros_p
-	: COMA R_INTEGER IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3);}
-	| COMA R_DOUBLE IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3);}
-	| COMA R_STRING IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3);}
-	| COMA R_BOOLEAN IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3);}
-	| COMA R_CHAR IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3);}
+	: COMA R_INTEGER IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3, $4);}
+	| COMA R_DOUBLE IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3, $4);}
+	| COMA R_STRING IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3, $4);}
+	| COMA R_BOOLEAN IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3, $4);}
+	| COMA R_CHAR IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3, $4);}
+	| { $$ = "NM"; }
 ;
 sentencias
 	: sentencias  sentencia { $1.push($2); $$ = $1; }
@@ -152,6 +162,16 @@ sentencias
 ;
 sentencia
 	: declaracion_var { $$ = $1; }
+	| R_IF ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE elseIf { $$ = instruccionesAPI.nuevoIf($3, $6);}
+	| R_WHILE ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE { $$ = instruccionesAPI.nuevoWhile($3, $6);}
+;
+elseIf
+	: R_ELSE elseIf_P { $$ = $2;}
+	| { $$ = "No Else Clause"; }	
+;
+elseIf_P
+	: R_IF ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE elseIf {$$ = instruccionesAPI.nuevoElseIf($3, $6);}
+	| ABRIR_LLAVE sentencias CERRAR_LLAVE {$$ =  instruccionesAPI.nuevoElse($2);}
 ;
 declaracion_var
 	: R_INTEGER IDENTIFICADOR defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
@@ -162,7 +182,7 @@ declaracion_var
 ;
 defincion_var
 	: IGUAL expresion { $$ = $2; }
-	| { $$ = null; }
+	| { $$ = "sin inicializar"; }
 ;
 expresion
 	: MENOS expresion %prec UMENOS				{ $$ = instruccionesAPI.nuevoOperacionUnaria($2, TIPO_OPERACION.NEGATIVO); }
@@ -174,4 +194,24 @@ expresion
 	| ENTERO											{ $$ = instruccionesAPI.nuevoValor(Number($1), TIPO_VALOR.NUMERO); }
 	| DECIMAL											{ $$ = instruccionesAPI.nuevoValor(Number($1), TIPO_VALOR.NUMERO); }
 	| IDENTIFICADOR										{ $$ = instruccionesAPI.nuevoValor($1, TIPO_VALOR.IDENTIFICADOR); }
+	| CARACTER											{ $$ = instruccionesAPI.nuevoValor($1, TIPO_VALOR.CARACTER); }
+	| R_TRUE											{ $$ = instruccionesAPI.nuevoValor($1, TIPO_VALOR.TRUE); }
+	| R_FALSE											{ $$ = instruccionesAPI.nuevoValor($1, TIPO_VALOR.FALSE); }
+;
+
+expresion_relacional
+	: expresion MAYOR_QUE expresion		{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.MAYOR); }
+	| expresion MENOR_QUE expresion		{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.MENOR); }
+	| expresion MAYOR_IGUAL expresion	{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.MAYOR_IGUAL); }
+	| expresion MENOR_IGUAL expresion	{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.MENOR_IGUAL); }
+	| expresion DOBLE_IGUAL expresion			{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.IGUAL_IGUAL); }
+	| expresion DISTINTO expresion			{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.DISTINTO); }
+	| expresion {$$ = $1} 
+;
+
+condicion
+	: expresion_relacional AND expresion_relacional     { $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.AND); }
+	| expresion_relacional OR expresion_relacional 		{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.OR); }
+	| NOT expresion_relacional							{ $$ = instruccionesAPI.nuevoOperacionUnaria($2, TIPO_OPERACION.NOT); }
+	| expresion_relacional								{ $$ = $1; }
 ;

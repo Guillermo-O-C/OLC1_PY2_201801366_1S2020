@@ -5,19 +5,21 @@ const TIPO_VALOR = {
     CADENA: 'CADENA',
     CARACTER: 'CARACTER',
     TRUE: 'TRUE',
-    TRUE: 'TRUE'
+    FALSE: 'FALSE'
 }
 const TIPO_OPERACIONES = {
-    SUMA:   'OP_SUMA',
-    RESTA:  'OP_RESTA',
-    MULTIPLICACION: 'OP_MULTIPLICACION',
-    DIVISION:   'OP_DIVISION',
-    NEGATIVO:   'OP_NEGATIVO',
-    MAYOR:      'OP_MAYOR',
-    MAYOR_IGUAL:    'OP_MAYOR_IGUAL',
-    MENOR:      'OP_MENOR',
-    MENOR_IGUAL:    'OP_MENOR_IGUAL',
-    CONCATENACION:  'OP_CONCATENACION'
+    SUMA:   'SUMA',
+    RESTA:  'RESTA',
+    MULTIPLICACION: 'MULTIPLICACION',
+    DIVISION:   'DIVISION',
+    NEGATIVO:   'NEGATIVO',
+    MAYOR:      'MAYOR',
+    MAYOR_IGUAL:    'MAYOR_IGUAL',
+    MENOR:      'MENOR',
+    MENOR_IGUAL:    'MENOR_IGUAL',
+    CONCATENACION:  'CONCATENACION',
+    IGUAL_IGUAL: 'IGUAL IGUAL',
+    DISTINTO: 'DISTINTO'
 };
 
 const SENTENCIAS = {
@@ -27,6 +29,7 @@ const SENTENCIAS = {
     IMPORT: 'IMPORT',
     IF: 'IF',
     ELSE_IF:    'ELSE_IF',
+    ELSE:   'ELSE',
     SWITCH: 'SWITCH',
     WHILE:  'WHILE',
     DO_WHILE:   'DO_WHILE',
@@ -38,7 +41,8 @@ const SENTENCIAS = {
     BREAK:  'BREAK',
     IMPRIMIR: 'IMPRIMIR',
     COMENTARIO: 'COMENTARIO',
-    PARAMETRO: 'PARAMETRO'
+    PARAMETRO: 'PARAMETRO',
+    VARIABLE: 'VARIABLE'
 }
 
 function nuevaOperacion(operandoIzq, OperandoDer, tipo){
@@ -83,6 +87,12 @@ const instruccionesAPI = {
             valor:valor
         };
     },
+    nuevaVariable: function(valor){
+        return{
+            tipo:SENTENCIAS.VARIABLE,
+            valor:valor
+        };
+    },
     nuevaAsignacion: function(id, expresion){
         return{
             tipo:SENTENCIAS.ASIGNACION,
@@ -92,18 +102,30 @@ const instruccionesAPI = {
     },
     nuevoIf: function(logica, sentencias){
         return{
-            tipo:TIPO_OPERACIONES.IF,
+            tipo:SENTENCIAS.IF,
             logica:logica,
             sentencias:sentencias
         };
     },
-    nuevoIfElse: function(logica, sentenciasSI, sentenciasNO){
+    nuevoElseIf: function(logica, sentencias){
         return{
             tipo:SENTENCIAS.ELSE_IF,
             logica:logica,
-            TRUE:sentenciasSI,
-            FALSE:sentenciasNO
+            sentencias:sentencias
         };
+    },
+    nuevoElse: function(sentencias){
+        return{
+            tipo:SENTENCIAS.ELSE,
+            sentencias:sentencias
+        };
+    },
+    nuevoWhile: function (logica, sentencias){
+        return{
+            tipo:SENTENCIAS.WHILE,
+            logica:logica,
+            sentencias:sentencias
+        };        
     },
     nuevaClase: function(idenficador, Sentencias){
         return{
@@ -124,11 +146,25 @@ const instruccionesAPI = {
             id:id
         };
     },
-    nuevoParametro: function(tipo_dato, id){
+    nuevoParametro: function(tipo_dato, id, siguiente){
         return{
             tipo:SENTENCIAS.PARAMETRO,
             tipo_dato:tipo_dato,
-            id:id
+            id:id,
+            siguiente:siguiente
+        };
+    },
+    nuevaFuncion: function(parametros, sentencias){
+        return {
+            tipo: SENTENCIAS.FUNCION,
+            parametros:parametros,
+            sentencias:sentencias
+        };
+    },
+    nuevoMain: function(sentencias){
+        return{
+            tipo:SENTENCIAS.MAIN,
+            sentencias:sentencias
         };
     }
 

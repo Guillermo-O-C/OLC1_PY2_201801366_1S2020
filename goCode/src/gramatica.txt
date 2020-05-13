@@ -33,7 +33,7 @@ P_for_var ->    P_Tipo_Dato id = expresion ;
                 | id = expresion ;
 P_for_change -> ++
                 |--
-P_Declaracion_funciones ->  void P_Declaracion_funciones
+P_Declaracion_funciones ->  void P_Declaracion_funciones'
                             | P_Tipo_Dato id(P_Parametros) { sentencias}  
 P_Declaracion_funciones' -> id (P_Parametros){ sentencias }
                             | main() { sentencias }
