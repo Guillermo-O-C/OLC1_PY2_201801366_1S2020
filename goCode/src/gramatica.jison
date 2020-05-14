@@ -53,13 +53,13 @@
 "%" return 'MODULO';
 "++" return 'INCREMENTO';
 "--" return 'DECREMENTO';
-"=" return 'IGUAL';
 "==" return 'IGUALDAD';
 "!=" return 'DISTINTO';
-">" return 'MAYOR';
+"=" return 'IGUAL';
 ">=" return 'MAYOR_IGUAL';
-"<" return 'MENOR';
+">" return 'MAYOR';
 "<=" return 'MENOR_IGUAL';
+"<" return 'MENOR';
 "&&" return 'AND';
 "||" return 'OR';
 "!" return 'NOT';
@@ -126,7 +126,7 @@ classActions
 	| asignacion { $$ = $1; }	//not sure
 ;
 declaracion
-	: R_VOID IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE  {$$ = instruccionesAPI.nuevaFuncion($1, $2, $4, $7);}
+	: R_VOID IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE  {$$ = instruccionesAPI.nuevoMetodo($2, $4, $7);}
 	| R_VOID R_MAIN ABRIR_PARENTESIS CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE {$$ = instruccionesAPI.nuevoMain($6);} 
 	| R_INTEGER IDENTIFICADOR declaracion_p { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
 	| R_DOUBLE IDENTIFICADOR declaracion_p { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
@@ -185,11 +185,11 @@ defincion_var
 	| { $$ = "sin inicializar"; }
 ;
 expresion
-	: MENOS expresion %prec UMENOS				{ $$ = instruccionesAPI.nuevoOperacionUnaria($2, TIPO_OPERACION.NEGATIVO); }
-	| expresion MAS expresion			{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.SUMA); }
-	| expresion MENOS expresion		{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.RESTA); }
-	| expresion MULTIPLICACION expresion			{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.MULTIPLICACION); }
-	| expresion DIVISION expresion	{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.DIVISION); }
+	: MENOS expresion %prec UMENOS				{ $$ = instruccionesAPI.nuevaOperacionUnaria($2, TIPO_OPERACION.NEGATIVO); }
+	| expresion MAS expresion			{ $$ = instruccionesAPI.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.SUMA); }
+	| expresion MENOS expresion		{ $$ = instruccionesAPI.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.RESTA); }
+	| expresion MULTIPLICACION expresion			{ $$ = instruccionesAPI.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.MULTIPLICACION); }
+	| expresion DIVISION expresion	{ $$ = instruccionesAPI.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.DIVISION); }
 	| ABRIR_PARENTESIS expresion CERRAR_PARENTESIS					{ $$ = $2; }
 	| ENTERO											{ $$ = instruccionesAPI.nuevoValor(Number($1), TIPO_VALOR.NUMERO); }
 	| DECIMAL											{ $$ = instruccionesAPI.nuevoValor(Number($1), TIPO_VALOR.NUMERO); }
@@ -200,18 +200,18 @@ expresion
 ;
 
 expresion_relacional
-	: expresion MAYOR_QUE expresion		{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.MAYOR); }
-	| expresion MENOR_QUE expresion		{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.MENOR); }
-	| expresion MAYOR_IGUAL expresion	{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.MAYOR_IGUAL); }
-	| expresion MENOR_IGUAL expresion	{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.MENOR_IGUAL); }
-	| expresion DOBLE_IGUAL expresion			{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.IGUAL_IGUAL); }
-	| expresion DISTINTO expresion			{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.DISTINTO); }
+	: expresion MAYOR expresion		{ $$ = instruccionesAPI.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.MAYOR); }
+	| expresion MENOR expresion		{ $$ = instruccionesAPI.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.MENOR); }
+	| expresion MAYOR_IGUAL expresion	{ $$ = instruccionesAPI.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.MAYOR_IGUAL); }
+	| expresion MENOR_IGUAL expresion	{ $$ = instruccionesAPI.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.MENOR_IGUAL); }
+	| expresion IGUALDAD expresion			{ $$ = instruccionesAPI.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.IGUAL_IGUAL); }
+	| expresion DISTINTO expresion			{ $$ = instruccionesAPI.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.DISTINTO); }
 	| expresion {$$ = $1} 
 ;
 
 condicion
-	: expresion_relacional AND expresion_relacional     { $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.AND); }
-	| expresion_relacional OR expresion_relacional 		{ $$ = instruccionesAPI.nuevoOperacionBinaria($1, $3, TIPO_OPERACION.OR); }
-	| NOT expresion_relacional							{ $$ = instruccionesAPI.nuevoOperacionUnaria($2, TIPO_OPERACION.NOT); }
-	| expresion_relacional								{ $$ = $1; }
+	: expresion_relacional AND expresion_relacional     { $$ = instruccionesAPI.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.AND); }
+	| expresion_relacional OR expresion_relacional 		{ $$ = instruccionesAPI.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.OR); }
+	| NOT expresion_relacional							{ $$ = instruccionesAPI.nuevaOperacionBinaria($2, TIPO_OPERACION.NOT); }
+	| expresion_relacional								{ $$ = instruccionesAPI.nuevaCondicion($1); }
 ;
