@@ -45,14 +45,14 @@
 \\"r" return 'RETORNO_CARRO';
 \\\\ return 'BARRA_INVERTIDA';
 \\\" return 'COMILLA_DOBLE';
+"++" return 'INCREMENTO';
+"--" return 'DECREMENTO';
 "+" return "MAS";
 "-" return 'MENOS';
 "*" return 'MULTIPLICACION';
 "/" return 'DIVISION';
 "^" return 'POTENCIA';
 "%" return 'MODULO';
-"++" return 'INCREMENTO';
-"--" return 'DECREMENTO';
 "==" return 'IGUALDAD';
 "!=" return 'DISTINTO';
 "=" return 'IGUAL';
@@ -113,7 +113,9 @@ instrucciones
 instruccion
    	: R_IMPORT IDENTIFICADOR PUNTO_COMA { $$ = instruccionesAPI.nuevoImport($2);}
 	| R_CLASS IDENTIFICADOR ABRIR_LLAVE classBody  CERRAR_LLAVE {$$=instruccionesAPI.nuevaClase($2, $4);}
-   	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); 
+   	| error PUNTO_COMA { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); 
+	   			salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
+	| error CERRAR_LLAVE { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); 
 	   			salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
 ;
 classBody
@@ -162,8 +164,35 @@ sentencias
 ;
 sentencia
 	: declaracion_var { $$ = $1; }
+	| IDENTIFICADOR IGUAL expresion PUNTO_COMA {$$ = instruccionesAPI.nuevaAsignacion($1, $3);} 
 	| R_IF ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE elseIf { $$ = instruccionesAPI.nuevoIf($3, $6);}
 	| R_WHILE ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE { $$ = instruccionesAPI.nuevoWhile($3, $6);}
+	| R_SWITCH ABRIR_PARENTESIS expresion CERRAR_PARENTESIS ABRIR_LLAVE casos default CERRAR_LLAVE {$$ = instruccionesAPI.nuevoSwitch($3, $6, $7);}
+	| R_FOR ABRIR_PARENTESIS for_init condicion PUNTO_COMA IDENTIFICADOR for_change CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE { $$ = instruccionesAPI.nuevoFor($3, $4, $7, $10);}
+;
+
+for_init	
+	: R_INTEGER IDENTIFICADOR IGUAL expresion PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $4);}
+	| R_DOUBLE IDENTIFICADOR IGUAL expresion PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $4);}
+	| IDENTIFICADOR IGUAL expresion PUNTO_COMA {$$ = instruccionesAPI.nuevaAsignacion($1, $3);} 
+;
+for_change
+	: INCREMENTO {$$=$1;}
+	| DECREMENTO {$$=$1;}
+	| IGUAL expresion {$$=$2;}
+;
+
+casos
+	: casos caso { $1.push($2); $$ = $1; }
+	| caso	 { $$ = [$1]; }
+;
+
+caso
+	: R_CASE expresion DOS_PUNTOS sentencias {$$ = instruccionesAPI.nuevoCase($2, $4);}
+;
+default
+	: R_DEFAULT DOS_PUNTOS sentencias {$$ = instruccionesAPI.nuevoDefault($3);}
+	| {$$ ="NO DEFAULT CLAUSE"}
 ;
 elseIf
 	: R_ELSE elseIf_P { $$ = $2;}

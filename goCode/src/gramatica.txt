@@ -24,8 +24,10 @@ P_if'-> else P_if''
 P_if'' ->   if ( P_condicion ) { P_sentecias } P_if'
             | { P_sentecias }
 P_Switch ->     switch ( expresion ) { P_casos P_default}
-P_casos ->  case expresion : sentencias 
+P_casos ->  case expresion : sentencias P_casos'
+P_casos' -> case expresion : sentencias P_casos' 
 P_default ->    default : sentencias
+                | espsilon
 P_Do_While ->   do { sentencias } while ( P_condicion )
 P_While ->  while( P_condicion ) { sentencias }
 P_For ->    for(P_for_var condicion ; id P_for_change ){ sentencias }

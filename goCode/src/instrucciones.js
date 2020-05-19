@@ -47,7 +47,9 @@ const SENTENCIAS = {
     COMENTARIO: 'COMENTARIO',
     PARAMETRO: 'PARAMETRO',
     VARIABLE: 'VARIABLE',
-    METODO: 'METODO'
+    METODO: 'METODO',
+    CASE: 'CASE',
+    DEFAULT: 'DEFAULT'
 }
 
 function nuevaOperacion(operandoIzq, OperandoDer, tipo) {
@@ -189,6 +191,36 @@ const instruccionesAPI = {
     nuevaExpresionLogica: function(expresion) {
         return {
             expresion: expresion
+        };
+    },
+    nuevoSwitch: function(id, cases, defaultT) {
+        return {
+            tipo: SENTENCIAS.SWITCH,
+            id: id,
+            cases: cases,
+            default: defaultT
+        };
+    },
+    nuevoCase: function(expresion, sentencias) {
+        return {
+            tipo: SENTENCIAS.CASE,
+            expresion: expresion,
+            sentencais: sentencias
+        };
+    },
+    nuevoDefault: function(sentencias) {
+        return {
+            tipo: SENTENCIAS.DEFAULT,
+            sentencias: sentencias
+        };
+    },
+    nuevoFor: function(inicial, final, paso, sentencias) {
+        return {
+            tipo: SENTENCIAS.FOR,
+            inicial: inicial,
+            final: final,
+            paso: paso,
+            sentencias: sentencias
         };
     }
 
