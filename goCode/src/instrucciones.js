@@ -49,7 +49,8 @@ const SENTENCIAS = {
     VARIABLE: 'VARIABLE',
     METODO: 'METODO',
     CASE: 'CASE',
-    DEFAULT: 'DEFAULT'
+    DEFAULT: 'DEFAULT',
+    LLAMADA: 'LLAMADA'
 }
 
 function nuevaOperacion(operandoIzq, OperandoDer, tipo) {
@@ -96,13 +97,20 @@ const instruccionesAPI = {
         return {
             tipo: SENTENCIAS.DECLARACION,
             tipo_dato: tipo_dato,
-            id: id,
+            listId: id,
             valor: valor
         };
     },
-    nuevaVariable: function(valor) {
+    nuevaListaid: function(id, siguiente) {
+        return {
+            id: id,
+            siguiente: siguiente
+        };
+    },
+    nuevaVariable: function(lisId, valor) {
         return {
             tipo: SENTENCIAS.VARIABLE,
+            listaId: lisId,
             valor: valor
         };
     },
@@ -167,9 +175,10 @@ const instruccionesAPI = {
             siguiente: siguiente
         };
     },
-    nuevaFuncion: function(parametros, sentencias) {
+    nuevaFuncion: function(id, parametros, sentencias) {
         return {
             tipo: SENTENCIAS.FUNCION,
+            id: id,
             parametros: parametros,
             sentencias: sentencias
         };
@@ -222,8 +231,21 @@ const instruccionesAPI = {
             paso: paso,
             sentencias: sentencias
         };
+    },
+    nuevaLlamada: function(id, parametros) {
+        return {
+            tipo: SENTENCIAS.LLAMADA,
+            id: id,
+            parametros: parametros
+        };
+    },
+    nuevaDeclaracionVariable: function(tipoDato, declaracion) {
+        return {
+            tipo: SENTENCIAS.DECLARACION,
+            tipo_dato: tipoDato,
+            declaracion: declaracion
+        };
     }
-
 }
 module.exports.TIPO_OPERACION = TIPO_OPERACIONES;
 module.exports.SENTENCIAS = SENTENCIAS;
