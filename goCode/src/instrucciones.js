@@ -121,18 +121,20 @@ const instruccionesAPI = {
             expresion: expresion
         };
     },
-    nuevoIf: function(logica, sentencias) {
+    nuevoIf: function(logica, sentencias, elseT) {
         return {
             tipo: SENTENCIAS.IF,
             logica: logica,
-            sentencias: sentencias
+            sentencias: sentencias,
+            else: elseT
         };
     },
-    nuevoElseIf: function(logica, sentencias) {
+    nuevoElseIf: function(logica, sentencias, elseT) {
         return {
             tipo: SENTENCIAS.ELSE_IF,
             logica: logica,
-            sentencias: sentencias
+            sentencias: sentencias,
+            else: elseT
         };
     },
     nuevoElse: function(sentencias) {
@@ -244,6 +246,25 @@ const instruccionesAPI = {
             tipo: SENTENCIAS.DECLARACION,
             tipo_dato: tipoDato,
             declaracion: declaracion
+        };
+    },
+    nuevoReturnFuncion: function(expresion) {
+        return {
+            tipo: SENTENCIAS.RETURN,
+            valor: expresion
+        };
+    },
+    nuevoDoWhile: function(sentencias, logica) {
+        return {
+            tipo: SENTENCIAS.DO_WHILE,
+            sentencias: sentencias,
+            logica: logica
+        };
+    },
+    nuevoArgumento: function(expresion, siguiente) {
+        return {
+            expresion: expresion,
+            sigueinte: siguiente
         };
     }
 }
