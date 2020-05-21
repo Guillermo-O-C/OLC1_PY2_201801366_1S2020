@@ -62,7 +62,6 @@ function nuevaOperacion(operandoIzq, OperandoDer, tipo) {
         tipo: tipo
     }
 }
-
 const instruccionesAPI = {
     nuevaOperacionBinaria: function(Izq, Der, tipo) {
         return nuevaOperacion(Izq, Der, tipo);

@@ -258,8 +258,15 @@
                     console.log(p.AST);
                     console.log(p.Errores);
                     document.getElementById('salida').value="";
-                    for(var i =0;i<p.Errores.length;i++){
-                         document.getElementById('salida').value+=p.Errores[i]+"\n";
+                    if(p.Errores=="undefined"){
+                         document.getElementById('salida').value="El analizador no se pudo recuperar del error";
+                    }else{
+                        if(p.Errores.length==0){
+                            document.getElementById('salida').value="El análisis ha finalizado correctamente";
+                        }
+                        for(var i =0;i<p.Errores.length;i++){
+                            document.getElementById('salida').value+=p.Errores[i]+"\n";
+                        }
                     }
                 }
             }

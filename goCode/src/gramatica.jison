@@ -79,9 +79,23 @@
 	const TIPO_OPERACION	= require('./instrucciones').TIPO_OPERACION;
 	const TIPO_VALOR 		= require('./instrucciones').TIPO_VALOR;
 	const instruccionesAPI	= require('./instrucciones').instruccionesAPI;
+	const Clase = require('./Objetos').Clase;
+	const Funcion = require('./Objetos').Funcion;
+	const Variable = require('./Objetos').Variable;
+	const Parametro = require('./Objetos').Parametro;
+	const AsignValue = require('./Objetos').AsignValue;
 	var salida=[];
-	var AllowBreak = 0;
-	var valueToReturn=false;
+	var Clases = [];
+	var CurrentClass ="";
+	var Funciones = [];
+	var CurrentFunction ="";
+	var Variables = [];
+	var VariableList =[];
+	var ParameterList = [];
+	var CurrentType="";
+	var CurrentVarType="";
+	var FunctionID="";
+	var isFunction = true;
 %}
 
 /* Asociación de operadores y precedencia */
@@ -99,20 +113,19 @@ ini
 		// cuado se haya reconocido la entrada completa retornamos el AST
 		var temporal = salida;
 		salida=[];
-		return {AST: $1, Errores: temporal};
+		var sentClass = Clases;
+		Clases = [];
+		return {AST: $1, Errores: temporal, Cuerpo:sentClass};
 	}
 ;
-
 instrucciones
 	: instrucciones instruccion { $1.push($2); $$ = $1; }
 	| instruccion               { $$ = [$1]; }
 ;
 instruccion
    	: R_IMPORT IDENTIFICADOR PUNTO_COMA { $$ = instruccionesAPI.nuevoImport($2);}
-	| R_CLASS IDENTIFICADOR ABRIR_LLAVE classBody  CERRAR_LLAVE {$$=instruccionesAPI.nuevaClase($2, $4);}
+	| R_CLASS IDENTIFICADOR ABRIR_LLAVE classBody  CERRAR_LLAVE {$$=instruccionesAPI.nuevaClase($2, $4); Clases.push(new Clase($2, Funciones)); Funciones=[];}
    	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
-	/*| error CERRAR_LLAVE { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); 
-	   			salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}*/
 ;
 classBody
 	: classBody classActions { $1.push($2); $$ = $1; }
@@ -123,32 +136,32 @@ classActions
 	| asignacion { $$ = $1; }	//not sure
 ;
 declaracion
-	: R_VOID IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentenciasVoid CERRAR_LLAVE  {  $$ = instruccionesAPI.nuevoMetodo($2, $4, $7);}
-	| R_VOID R_MAIN ABRIR_PARENTESIS CERRAR_PARENTESIS ABRIR_LLAVE sentenciasVoid CERRAR_LLAVE {$$ = instruccionesAPI.nuevoMain($6);} 
-	| R_INTEGER  declaracion_p { $$ = instruccionesAPI.nuevaDeclaracionVariable($1, $2);}
-	| R_DOUBLE  declaracion_p { $$ = instruccionesAPI.nuevaDeclaracionVariable($1, $2);}
-	| R_STRING  declaracion_p { $$ = instruccionesAPI.nuevaDeclaracionVariable($1, $2);}
-	| R_BOOLEAN  declaracion_p { $$ = instruccionesAPI.nuevaDeclaracionVariable($1, $2);}
-	| R_CHAR  declaracion_p { $$ = instruccionesAPI.nuevaDeclaracionVariable($1, $2);}
+	: R_VOID IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentenciasVoid CERRAR_LLAVE  {  $$ = instruccionesAPI.nuevoMetodo($2, $4, $7); Funciones.push(new Funcion($1, $2, ParameterList, Variables)); Variables=[]; ParameterList=[];}
+	| R_VOID R_MAIN ABRIR_PARENTESIS CERRAR_PARENTESIS ABRIR_LLAVE sentenciasVoid CERRAR_LLAVE {$$ = instruccionesAPI.nuevoMain($6); Funciones.push(new Funcion($1, $2, ParameterList, Variables)); Variables=[]; ParameterList=[];} 
+	| R_INTEGER  declaracion_p { $$ = instruccionesAPI.nuevaDeclaracionVariable($1, $2); if(isFunction)Funciones.push(new Funcion($1, FunctionID, ParameterList, Variables)); Variables=[];  ParameterList=[]; }
+	| R_DOUBLE  declaracion_p { $$ = instruccionesAPI.nuevaDeclaracionVariable($1, $2); if(isFunction)Funciones.push(new Funcion($1, FunctionID, ParameterList, Variables)); Variables=[];  ParameterList=[];}
+	| R_STRING  declaracion_p { $$ = instruccionesAPI.nuevaDeclaracionVariable($1, $2); if(isFunction)Funciones.push(new Funcion($1, FunctionID, ParameterList, Variables)); Variables=[];  ParameterList=[];}
+	| R_BOOLEAN  declaracion_p { $$ = instruccionesAPI.nuevaDeclaracionVariable($1, $2); if(isFunction)Funciones.push(new Funcion($1, FunctionID, ParameterList, Variables)); Variables=[];  ParameterList=[];}
+	| R_CHAR  declaracion_p { $$ = instruccionesAPI.nuevaDeclaracionVariable($1, $2); if(isFunction)Funciones.push(new Funcion($1, FunctionID, ParameterList, Variables)); Variables=[];  ParameterList=[];}
 ;
 declaracion_p
-	: listaID  defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaVariable($1, $2);}
-	| IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE  {$$ = instruccionesAPI.nuevaFuncion($1, $3, $6);}
+	: listaID  defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaVariable($1, $2); isFunction=false;  Variables=[]; VariableList=[];}
+	| IDENTIFICADOR ABRIR_PARENTESIS parametros CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE  {$$ = instruccionesAPI.nuevaFuncion($1, $3, $6); FunctionID=$1; isFunction=true;}
 ;
 parametros
-	: R_INTEGER IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2, $3);}
-	| R_DOUBLE IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2, $3);}
-	| R_STRING IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2, $3);}
-	| R_BOOLEAN IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2, $3);}
-	| R_CHAR IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2, $3);}
+	: R_INTEGER IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2, $3); ParameterList.push(new Parametro($1, $2));}
+	| R_DOUBLE IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2, $3); ParameterList.push(new Parametro($1, $2));}
+	| R_STRING IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2, $3); ParameterList.push(new Parametro($1, $2));}
+	| R_BOOLEAN IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2, $3); ParameterList.push(new Parametro($1, $2));}
+	| R_CHAR IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($1, $2, $3); ParameterList.push(new Parametro($1, $2));}
 	| { $$ = "NA"; }
 ;
 parametros_p
-	: COMA R_INTEGER IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3, $4);}
-	| COMA R_DOUBLE IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3, $4);}
-	| COMA R_STRING IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3, $4);}
-	| COMA R_BOOLEAN IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3, $4);}
-	| COMA R_CHAR IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3, $4);}
+	: COMA R_INTEGER IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3, $4); ParameterList.push(new Parametro($2, $3));}
+	| COMA R_DOUBLE IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3, $4); ParameterList.push(new Parametro($2, $3));}
+	| COMA R_STRING IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3, $4); ParameterList.push(new Parametro($2, $3));}
+	| COMA R_BOOLEAN IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3, $4); ParameterList.push(new Parametro($2, $3));}
+	| COMA R_CHAR IDENTIFICADOR parametros_p { $$ = instruccionesAPI.nuevoParametro($2, $3, $4); ParameterList.push(new Parametro($2, $3));}
 	| { $$ = "NM"; }
 ;
 sentencias
@@ -172,7 +185,6 @@ sentencia
    	| error PUNTO_COMA{ console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
 	
 ;
-
 elseIf
 	: R_ELSE elseIf_P { $$ = $2;}
 	| { $$ = "No Else Clause"; }	
@@ -312,17 +324,17 @@ for_change
 	| IGUAL expresion {$$=$2;}
 ;
 declaracion_var
-	: R_INTEGER listaID defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
-	| R_DOUBLE listaID defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
-	| R_STRING listaID defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
-	| R_BOOLEAN listaID defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
-	| R_CHAR listaID defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
+	: R_INTEGER listaID defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3); AsignValue.asignarVariables($1, VariableList, Variables); VariableList=[]; }
+	| R_DOUBLE listaID defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3); AsignValue.asignarVariables($1, VariableList, Variables); VariableList=[];}
+	| R_STRING listaID defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3); AsignValue.asignarVariables($1, VariableList, Variables); VariableList=[];}
+	| R_BOOLEAN listaID defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3); AsignValue.asignarVariables($1, VariableList, Variables); VariableList=[];}
+	| R_CHAR listaID defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3); AsignValue.asignarVariables($1, VariableList, Variables); VariableList=[];}
 ;
 listaID
-	:	IDENTIFICADOR listaID_P { $$ = instruccionesAPI.nuevaListaid($1, $2);}
+	:	IDENTIFICADOR listaID_P { $$ = instruccionesAPI.nuevaListaid($1, $2); VariableList.push(new Variable("", $1));}
 ;
 listaID_P
-	: COMA IDENTIFICADOR listaID_P {$$ = instruccionesAPI.nuevaListaid($2, $3);}
+	: COMA IDENTIFICADOR listaID_P {$$ = instruccionesAPI.nuevaListaid($2, $3); VariableList.push(new Variable("", $2));}
 	| {$$="NM";}
 ;
 defincion_var
