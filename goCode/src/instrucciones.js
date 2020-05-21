@@ -50,7 +50,9 @@ const SENTENCIAS = {
     METODO: 'METODO',
     CASE: 'CASE',
     DEFAULT: 'DEFAULT',
-    LLAMADA: 'LLAMADA'
+    LLAMADA: 'LLAMADA',
+    INCREMENTO: 'INCREMENTO',
+    DECREMENTO: 'DECREMENTO'
 }
 
 function nuevaOperacion(operandoIzq, OperandoDer, tipo) {
@@ -264,7 +266,19 @@ const instruccionesAPI = {
     nuevoArgumento: function(expresion, siguiente) {
         return {
             expresion: expresion,
-            sigueinte: siguiente
+            siguiente: siguiente
+        };
+    },
+    nuevoIncremento: function(id) {
+        return {
+            tipo: SENTENCIAS.INCREMENTO,
+            id: id
+        };
+    },
+    nuevoDecremento: function(id) {
+        return {
+            tipo: SENTENCIAS.DECREMENTO,
+            id: id
         };
     }
 }

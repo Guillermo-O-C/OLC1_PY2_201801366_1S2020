@@ -159,6 +159,8 @@ sentencia
 	: declaracion_var { $$ = $1; }
 	| IDENTIFICADOR IGUAL expresion PUNTO_COMA {$$ = instruccionesAPI.nuevaAsignacion($1, $3);}
 	| IDENTIFICADOR ABRIR_PARENTESIS argumentos CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevaLlamada($1, $3);}
+	| IDENTIFICADOR INCREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoIncremento($1);}
+	| IDENTIFICADOR DECREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoDecremento($1);}
 	| R_IF ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE elseIf { $$ = instruccionesAPI.nuevoIf($3, $6, $8);}
 	| R_WHILE ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentenciasBreak CERRAR_LLAVE { $$ = instruccionesAPI.nuevoWhile($3, $6);}
 	| R_DO ABRIR_LLAVE sentenciasBreak CERRAR_LLAVE R_WHILE ABRIR_PARENTESIS condicion CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevoDoWhile($3, $7);}
@@ -170,6 +172,15 @@ sentencia
    	| error PUNTO_COMA{ console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
 	
 ;
+
+elseIf
+	: R_ELSE elseIf_P { $$ = $2;}
+	| { $$ = "No Else Clause"; }	
+;
+elseIf_P
+	: R_IF ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE elseIf {$$ = instruccionesAPI.nuevoElseIf($3, $6, $8);}
+	| ABRIR_LLAVE sentencias CERRAR_LLAVE {$$ =  instruccionesAPI.nuevoElse($2);}
+;
 sentenciasBreak
 	: sentenciasBreak  sentenciaBreak { $1.push($2); $$ = $1; }
 	| sentenciaBreak { $$ = [$1]; }
@@ -178,7 +189,9 @@ sentenciaBreak
 	: declaracion_var { $$ = $1; }
 	| IDENTIFICADOR IGUAL expresion PUNTO_COMA {$$ = instruccionesAPI.nuevaAsignacion($1, $3);}
 	| IDENTIFICADOR ABRIR_PARENTESIS argumentos CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevaLlamada($1, $3);}
-	| R_IF ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentenciasBreak CERRAR_LLAVE elseIf { $$ = instruccionesAPI.nuevoIf($3, $6, $8);}
+	| IDENTIFICADOR INCREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoIncremento($1);}
+	| IDENTIFICADOR DECREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoDecremento($1);}
+	| R_IF ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentenciasBreak CERRAR_LLAVE elseIfBreak { $$ = instruccionesAPI.nuevoIf($3, $6, $8);}
 	| R_WHILE ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentenciasBreak CERRAR_LLAVE { $$ = instruccionesAPI.nuevoWhile($3, $6);}
 	| R_DO ABRIR_LLAVE sentenciasBreak CERRAR_LLAVE R_WHILE ABRIR_PARENTESIS condicion CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevoDoWhile($3, $7);}
 	| R_SWITCH ABRIR_PARENTESIS expresion CERRAR_PARENTESIS ABRIR_LLAVE casos default CERRAR_LLAVE {$$ = instruccionesAPI.nuevoSwitch($3, $6, $7);}
@@ -190,6 +203,14 @@ sentenciaBreak
 	| R_RETURN condicion PUNTO_COMA{$$=instruccionesAPI.nuevoReturnFuncion($2);}
 	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
 
+;
+elseIfBreak
+	: R_ELSE elseIf_PBreak { $$ = $2;}
+	| { $$ = "No Else Clause"; }	
+;
+elseIf_PBreak
+	: R_IF ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentenciasBreak CERRAR_LLAVE elseIfBreak {$$ = instruccionesAPI.nuevoElseIf($3, $6, $8);}
+	| ABRIR_LLAVE sentenciasBreak CERRAR_LLAVE {$$ =  instruccionesAPI.nuevoElse($2);}
 ;
 casos
 	: casos caso { $1.push($2); $$ = $1; }
@@ -210,7 +231,9 @@ sentenciaVoid
 	: declaracion_var { $$ = $1; }
 	| IDENTIFICADOR IGUAL expresion PUNTO_COMA {$$ = instruccionesAPI.nuevaAsignacion($1, $3);}
 	| IDENTIFICADOR ABRIR_PARENTESIS argumentos CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevaLlamada($1, $3);}
-	| R_IF ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentenciasVoid CERRAR_LLAVE elseIf { $$ = instruccionesAPI.nuevoIf($3, $6, $8);}
+	| IDENTIFICADOR INCREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoIncremento($1);}
+	| IDENTIFICADOR DECREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoDecremento($1);}
+	| R_IF ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentenciasVoid CERRAR_LLAVE elseIfVoid { $$ = instruccionesAPI.nuevoIf($3, $6, $8);}
 	| R_WHILE ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentenciasVoidBreak CERRAR_LLAVE { $$ = instruccionesAPI.nuevoWhile($3, $6);}
 	| R_DO ABRIR_LLAVE sentenciasVoidBreak CERRAR_LLAVE R_WHILE ABRIR_PARENTESIS condicion CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevoDoWhile($3, $7);}
 	| R_SWITCH ABRIR_PARENTESIS expresion CERRAR_PARENTESIS ABRIR_LLAVE casosVoid defaultVoid CERRAR_LLAVE {$$ = instruccionesAPI.nuevoSwitch($3, $6, $7);}
@@ -220,6 +243,14 @@ sentenciaVoid
 	| R_RETURN PUNTO_COMA {$$=$1;}  
 	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
 ;
+elseIfVoid
+	: R_ELSE elseIf_PVoid { $$ = $2;}
+	| { $$ = "No Else Clause"; }	
+;
+elseIf_PVoid
+	: R_IF ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentenciasVoid CERRAR_LLAVE elseIfVoid {$$ = instruccionesAPI.nuevoElseIf($3, $6, $8);}
+	| ABRIR_LLAVE sentenciasVoid CERRAR_LLAVE {$$ =  instruccionesAPI.nuevoElse($2);}
+;
 sentenciasVoidBreak
 	: sentenciasVoidBreak  sentenciaVoidBreak { $1.push($2); $$ = $1; }
 	| sentenciaVoidBreak { $$ = [$1]; }
@@ -228,7 +259,9 @@ sentenciaVoidBreak
 	: declaracion_var { $$ = $1; }
 	| IDENTIFICADOR IGUAL expresion PUNTO_COMA {$$ = instruccionesAPI.nuevaAsignacion($1, $3);}
 	| IDENTIFICADOR ABRIR_PARENTESIS argumentos CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevaLlamada($1, $3);}
-	| R_IF ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentenciasVoidBreak CERRAR_LLAVE elseIf { $$ = instruccionesAPI.nuevoIf($3, $6, $8);}
+	| IDENTIFICADOR INCREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoIncremento($1);}
+	| IDENTIFICADOR DECREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoDecremento($1);}
+	| R_IF ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentenciasVoidBreak CERRAR_LLAVE elseIfVoidBreak { $$ = instruccionesAPI.nuevoIf($3, $6, $8);}
 	| R_WHILE ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentenciasVoidBreak CERRAR_LLAVE { $$ = instruccionesAPI.nuevoWhile($3, $6);}
 	| R_DO ABRIR_LLAVE sentenciasVoidBreak CERRAR_LLAVE R_WHILE ABRIR_PARENTESIS condicion CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevoDoWhile($3, $7);}
 	| R_SWITCH ABRIR_PARENTESIS expresion CERRAR_PARENTESIS ABRIR_LLAVE casosVoid defaultVoid CERRAR_LLAVE {$$ = instruccionesAPI.nuevoSwitch($3, $6, $7);}
@@ -240,6 +273,14 @@ sentenciaVoidBreak
 	| R_RETURN PUNTO_COMA {$$=$1;}
 	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
 
+;
+elseIfVoidBreak
+	: R_ELSE elseIf_PVoidBreak { $$ = $2;}
+	| { $$ = "No Else Clause"; }	
+;
+elseIf_PVoidBreak
+	: R_IF ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentenciasVoidBreak CERRAR_LLAVE elseIfVoidBreak {$$ = instruccionesAPI.nuevoElseIf($3, $6, $8);}
+	| ABRIR_LLAVE sentenciasVoidBreak CERRAR_LLAVE {$$ =  instruccionesAPI.nuevoElse($2);}
 ;
 casosVoid
 	: casosVoid casoVoid { $1.push($2); $$ = $1; }
@@ -269,14 +310,6 @@ for_change
 	: INCREMENTO {$$=$1;}
 	| DECREMENTO {$$=$1;}
 	| IGUAL expresion {$$=$2;}
-;
-elseIf
-	: R_ELSE elseIf_P { $$ = $2;}
-	| { $$ = "No Else Clause"; }	
-;
-elseIf_P
-	: R_IF ABRIR_PARENTESIS condicion CERRAR_PARENTESIS ABRIR_LLAVE sentencias CERRAR_LLAVE elseIf {$$ = instruccionesAPI.nuevoElseIf($3, $6, $8);}
-	| ABRIR_LLAVE sentencias CERRAR_LLAVE {$$ =  instruccionesAPI.nuevoElse($2);}
 ;
 declaracion_var
 	: R_INTEGER listaID defincion_var PUNTO_COMA { $$ = instruccionesAPI.nuevaDeclaracion($1, $2, $3);}
