@@ -24,6 +24,7 @@ class Variable {
         this.id = id;
     }
 }
+
 const AsignValue = {
     asignarVariables: function(tipo, variableList, Variables) {
         variableList.forEach(element => {

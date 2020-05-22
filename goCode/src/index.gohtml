@@ -240,8 +240,12 @@
     </script>
     
      <script>
+        var TablaCopia;
         var AST_COLLECTION;
         var Copias;
+        var SinErrores = true; 
+        var OriginalAST;
+        var CopiasDetectadas;
         function DataMessenger() {
             const output = "";
             AST_COLLECTION =[];
@@ -258,11 +262,11 @@
                     console.log(p.Errores);
                     document.getElementById('salida').value="";
                     if(p.Errores=="undefined"){
-                         document.getElementById('salida').value="El analizador no se pudo recuperar del error";
+                         document.getElementById('salida').value="El análisis del archivo original no se pudo recuperar del error";
                     }else{
                         if(p.Errores.length==0){
                             console.log("el ast es " +JSON.stringify(p.AST));
-                            document.getElementById('salida').value="El análisis ha finalizado correctamente";
+                            document.getElementById('salida').value="El análisis del archivo original ha finalizado correctamente\n";
                         }
                         for(var i =0;i<p.Errores.length;i++){
                             document.getElementById('salida').value+=p.Errores[i]+"\n";
@@ -274,11 +278,6 @@
             xml.send(JSON.stringify({
                 original: text
             }));
-        }   
-        var SinErrores = true; 
-        var OriginalAST;
-        function AnalizarCopias() {
-            OriginalAST = JSON.parse(AST_COLLECTION[0]).Cuerpo;
             Copias =[];
             SinErrores = true;
             document.getElementById('salida').value="";
@@ -286,14 +285,162 @@
                 var els = document.querySelectorAll("a[href='#tab" + i + "']");                
                 EjecutarAnalisis(document.getElementById('entrada' + i).value, i, els[0].textContent);
             }
+        }     
+        function AnalizarCopias() {
+            OriginalAST = JSON.parse(AST_COLLECTION[0]).Cuerpo;
+            CopiasDetectadas=[];
+            TablaCopia="";
+            var contador = 1;
             if(SinErrores){
-                VerificarCopias();
+                Copias.forEach(copia =>{
+                    var tmp = document.querySelectorAll("a[href='#tab" + contador + "']");
+                    TablaCopia+="<tr bgcolor = \"4C868A\" ><td colspan = 2 align = \"center\" ><h3> Copias en "+tmp[0].textContent+"</h3></td></tr>\n";
+                    contador++;
+                    var temporalCopy = JSON.parse(copia).Cuerpo;
+                    temporalCopy.forEach(clase =>{
+                        if(ExistingNameClass(clase.id)){
+                            var sameFunctions = true;
+                            sameFunctions = AmountOfFuntionsInClass(clase);
+                            clase.funciones.forEach(funcion => {
+                                if(ExistingFuntion(clase.id, funcion)){
+                                    //Cuenta como una función copia
+                                    agregarFuncionCopiada(clase, funcion);
+                                    funcion.variables.forEach(variable => {
+                                        if(ExistingVariable(clase.id, funcion, variable)){
+                                            //Cuenta como variable copia
+                                            agregarVariableCopiada(clase, funcion, variable);
+                                        }
+                                    });
+                                }else{
+                                    sameFunctions=false;
+                                }
+                            });
+                            if(sameFunctions){
+                                //Cuenta como una clase copia
+                                agregarClaseCopiada(clase);
+                            }
+                        }
+                    });
+                });
+            }
+            if(CopiasDetectadas.length>0) SaveCopyTable();
+        }
+        function ExistingNameClass(name){
+            var flag = false;
+            OriginalAST.forEach(claseOriginal =>{
+                if(claseOriginal.id==name){
+                    flag = true;
+                }
+            });
+            return flag;
+        }
+        function AmountOfFuntionsInClass(clase){
+            var flag = false;
+            OriginalAST.forEach(claseOriginal =>{
+                if(claseOriginal.id==name){
+                    if(claseOriginal.funciones.length==clase.funciones.length){
+                        flag = true;
+                    }
+                }
+            });
+            return flag;
+        }
+        function ExistingFuntion(name, funcion){
+            var flag = false;
+            OriginalAST.forEach(claseOriginal =>{
+                if(claseOriginal.id==name){
+                    claseOriginal.funciones.forEach(funcionOriginal=>{
+                        if(sameFunction(funcionOriginal, funcion)){
+                            flag = true;
+                        }
+                    });
+                    return flag;
+                }
+            });
+            return flag;
+        }
+        function ExistingVariable(name, funcion, variable){
+            var flag = false;
+            OriginalAST.forEach(claseOriginal =>{
+                if(claseOriginal.id==name){
+                    claseOriginal.funciones.forEach(funcionOriginal=>{
+                        if(sameFunction(funcionOriginal, funcion)){
+                            funcionOriginal.variables.forEach(variableOriginal=>{
+                                if(variableOriginal.tipo==variable.tipo){
+                                    flag = true;
+                                }
+                            });
+                            return flag;
+                        }
+                    });
+                }
+            });
+            return flag;
+        }
+        function sameFunction(f1, f2){
+            var flag = false;
+            if(f1.tipo==f2.tipo){
+                if(sameParameters(f1.parametros, f2.parametros)){
+                    flag = true;
+                }
+            }
+            return flag;
+        }
+        function sameParameters(p1, p2){
+            var flag = true;
+            if(p1.length==p2.length){
+                for(var i =0;i<p1.length;i++){
+                    if(p1[i].tipo!=p2[i].tipo){
+                        flag = false;
+                    }
+                }
+                return flag;
+            }else{
+                return false;
             }
         }
-        VerificarCopias(){
-            for(var i =0;i<Copias.length;i++){
-                
+        function agregarClaseCopiada(clase){
+            var ClaseCopiada = new Object();
+            ClaseCopiada.copia = "CLASE";
+            ClaseCopiada.id = clase.id;
+            ClaseCopiada.cantidad = clase.funciones.length;
+            CopiasDetectadas.push(ClaseCopiada);
+            TablaCopia+="<tr><td rowspan=2>CLASE</td><td> Nombre: "+clase.id+"</td></tr>";
+            TablaCopia+="<tr><td>Cantidad de funciones: "+clase.funciones.length+"</td></tr>";
+        }
+        function agregarFuncionCopiada(clase, funcion){
+            var FuncionCopiada = new Object();
+            FuncionCopiada.copia = "FUNCION";
+            FuncionCopiada.clase = clase.id;
+            FuncionCopiada.tipo = funcion.tipo;
+            FuncionCopiada.id = funcion.id;
+            var parametros ="";
+            for(var i =0;i<funcion.parametros.length;i++){
+                if(i<funcion.parametros.length-1){
+                    parametros+=funcion.parametros[i].tipo+" "+funcion.parametros[i].id+", ";
+                }else{
+                    parametros+=funcion.parametros[i].tipo+" "+funcion.parametros[i].id;
+                }
             }
+            if(parametros=="") parametros="Sin parámetros";
+            FuncionCopiada.parametros =  parametros;
+            CopiasDetectadas.push(FuncionCopiada);
+            TablaCopia+="<tr><td rowspan=3>FUNCIÓN</td><td> Tipo de Retorno: "+funcion.tipo+"</td></tr>";
+            TablaCopia+="<tr><td>Nombre: "+funcion.id+"</td></tr>";
+            TablaCopia+="<tr><td>Parámetros: "+parametros+"</td></tr>";
+        }
+        function agregarVariableCopiada(clase, funcion, variable){
+            var VariableCopiada = new Object();
+            VariableCopiada.copia = "VARIABLE";
+            VariableCopiada.clase = clase.id;
+            VariableCopiada.funcion = funcion.id;
+            VariableCopiada.tipo = variable.tipo;
+            VariableCopiada.id = variable.id;
+            CopiasDetectadas.push(VariableCopiada);
+            TablaCopia+="<tr><td rowspan=4>VARIABLE</td><td> Clase: "+clase.id+"</td></tr>";
+            TablaCopia+="<tr><td>Función/Método: "+funcion.id+"</td></tr>";
+            TablaCopia+="<tr><td>Tipo: "+variable.tipo+"</td></tr>";
+            TablaCopia+="<tr><td>Nombre: "+variable.id+"</td></tr>";        
         }
         function EjecutarAnalisis(entry, numero, nombre){
             var xml = new XMLHttpRequest();
@@ -309,13 +456,13 @@
                     console.log(p.Errores);
                     if(p.Errores=="undefined"){
                         SinErrores=false;
-                         document.getElementById('salida').value+="El analizador no se pudo recuperar del error en el archivo "+nombre;
+                         document.getElementById('salida').value+="El analizador no se pudo recuperar del error en el archivo "+nombre+"\n";
                     }else{
                         if(p.Errores.length==0){
-                        SinErrores=false;
                             console.log("el ast es " +JSON.stringify(p.AST));
-                            document.getElementById('salida').value+="El análisis del archivo "+nombre+" ha finalizado correctamente";
+                            document.getElementById('salida').value+="El análisis del archivo "+nombre+" ha finalizado correctamente\n";
                         }else{
+                        SinErrores=false;
                         document.getElementById('salida').value+="Los errores del archivo "+nombre+" son:\n";
                         for(var i =0;i<p.Errores.length;i++){
                             document.getElementById('salida').value+=p.Errores[i]+"\n";
@@ -343,6 +490,29 @@
         function PrintTrees(){
             console.log(AST_COLLECTION[0]);
             PrintAST(JSON.stringify(JSON.parse(AST_COLLECTION[0]).AST));
+        }
+        function SaveCopyTable(){
+            var ArchivoSalida = document.createElement("html");
+            var Cuerpo = "<html>\n";
+            Cuerpo+="<head>\n";
+            Cuerpo+="<meta charset = \"utf -8\">\n";
+            Cuerpo+="<title> Tabla de Erroes</title>\n";
+            Cuerpo+="<style>td{ border-bottom: 1px solid black;}</style>";
+            Cuerpo+="</head>\n";
+            Cuerpo+="<body bgcolor=#000>\n";
+            Cuerpo+="<table align = \"center\" style = \"width:80% ; font-family: consolas; background-color: #ffd868;\">\n";
+            Cuerpo+="<tr bgcolor = \"4C868A\" ><td colspan = 2 align = \"center\" ><h2> Tabla de Copias</h2></td></tr>\n";
+            Cuerpo+=TablaCopia;
+            Cuerpo+="</table>\n";
+            Cuerpo+="</body>\n";
+            Cuerpo+="</html>\n";
+            ArchivoSalida.innerHTML = Cuerpo;    
+            var DownloadLink = document.getElementById("downloadFile");
+            var newFile = new File([Cuerpo], "TablaDeCopias.html");
+            var direccion = window.URL.createObjectURL(newFile);
+            DownloadLink.href = direccion;
+            DownloadLink.download = "TablaDeCopias.html";
+            DownloadLink.click();
         }
     </script>
     <script>
