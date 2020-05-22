@@ -238,15 +238,17 @@
 
         }
     </script>
-    
      <script>
         var TablaCopia;
+        var TablaErrores;
         var AST_COLLECTION;
         var Copias;
         var SinErrores = true; 
         var OriginalAST;
         var CopiasDetectadas;
         function DataMessenger() {
+            TablaErrores="";
+            document.getElementById('salida').value="";
             const output = "";
             AST_COLLECTION =[];
             var xml = new XMLHttpRequest();
@@ -254,22 +256,25 @@
             xml.setRequestHeader('Content-Type', 'application/json');
             xml.onreadystatechange = function() {
                 if (xml.readyState == XMLHttpRequest.DONE) {
+                    TablaErrores+="<tr  bgcolor = \"4C868A\"><td align = \"center\" colspan=5><h3>Errores del archivo original</h3></td></tr>\n";
+                    document.getElementById('salida').value+="Analizando el archivo original\n";
+                        
                    // alert("yasta");
                     AST_COLLECTION.push(xml.responseText);
-                    var p = AST_COLLECTION[0];
-                    p = JSON.parse(p);
+                    var x = AST_COLLECTION[0];
+                    var p = JSON.parse(x);
                     console.log(p);
                     console.log(p.Errores);
-                    document.getElementById('salida').value="";
                     if(p.Errores=="undefined"){
-                         document.getElementById('salida').value="El análisis del archivo original no se pudo recuperar del error";
+                         document.getElementById('salida').value+="El análisis del archivo original no se pudo recuperar del error\n";
                     }else{
                         if(p.Errores.length==0){
                             console.log("el ast es " +JSON.stringify(p.AST));
-                            document.getElementById('salida').value="El análisis del archivo original ha finalizado correctamente\n";
+                            document.getElementById('salida').value+="El análisis del archivo original ha finalizado correctamente\n";
                         }
                         for(var i =0;i<p.Errores.length;i++){
                             document.getElementById('salida').value+=p.Errores[i]+"\n";
+                            TablaErrores+="<tr ><td align = \"center\">"+i+"</td><td align = \"center\">"+p.ArrayOfErrors[i].tipo+"</td><td align = \"center\">"+p.ArrayOfErrors[i].linea+"</td><td align = \"center\">"+p.ArrayOfErrors[i].columna+"</td><td align = \"center\">"+p.ArrayOfErrors[i].descripcion+"</td></tr>\n";
                         }
                     }
                 }
@@ -280,9 +285,8 @@
             }));
             Copias =[];
             SinErrores = true;
-            document.getElementById('salida').value="";
             for(var i =1;i<=tabID;i++){
-                var els = document.querySelectorAll("a[href='#tab" + i + "']");                
+                var els = document.querySelectorAll("a[href='#tab" + i + "']");
                 EjecutarAnalisis(document.getElementById('entrada' + i).value, i, els[0].textContent);
             }
         }     
@@ -337,7 +341,7 @@
         function AmountOfFuntionsInClass(clase){
             var flag = false;
             OriginalAST.forEach(claseOriginal =>{
-                if(claseOriginal.id==name){
+                if(claseOriginal.id==clase.id){
                     if(claseOriginal.funciones.length==clase.funciones.length){
                         flag = true;
                     }
@@ -448,6 +452,8 @@
             xml.setRequestHeader('Content-Type', 'application/json');
             xml.onreadystatechange = function() {
                 if (xml.readyState == XMLHttpRequest.DONE) {
+                    document.getElementById('salida').value+="Analizando el archivo "+nombre+"\n";
+                    TablaErrores+="<tr bgcolor = \"4C868A\"><td align = \"center\" colspan=5><h3>Errores del archivo "+nombre+"</h3></td></tr>\n";
                    // alert("yasta");
                     Copias.push(xml.responseText);
                     var p = Copias[Copias.length-1];
@@ -466,6 +472,7 @@
                         document.getElementById('salida').value+="Los errores del archivo "+nombre+" son:\n";
                         for(var i =0;i<p.Errores.length;i++){
                             document.getElementById('salida').value+=p.Errores[i]+"\n";
+                            TablaErrores+="<tr ><td align = \"center\">"+i+"</td><td align = \"center\">"+p.ArrayOfErrors[i].tipo+"</td><td align = \"center\">"+p.ArrayOfErrors[i].linea+"</td><td align = \"center\">"+p.ArrayOfErrors[i].columna+"</td><td align = \"center\">"+p.ArrayOfErrors[i].descripcion+"</td></tr>\n";
                         }
                         }
                         
@@ -496,7 +503,7 @@
             var Cuerpo = "<html>\n";
             Cuerpo+="<head>\n";
             Cuerpo+="<meta charset = \"utf -8\">\n";
-            Cuerpo+="<title> Tabla de Erroes</title>\n";
+            Cuerpo+="<title> Tabla de Copias</title>\n";
             Cuerpo+="<style>td{ border-bottom: 1px solid black;}</style>";
             Cuerpo+="</head>\n";
             Cuerpo+="<body bgcolor=#000>\n";
@@ -512,6 +519,30 @@
             var direccion = window.URL.createObjectURL(newFile);
             DownloadLink.href = direccion;
             DownloadLink.download = "TablaDeCopias.html";
+            DownloadLink.click();
+        }
+        function SaveErrorFile(){
+            var ArchivoSalida = document.createElement("html");
+            var Cuerpo = "<html>\n";
+            Cuerpo+="<head>\n";
+            Cuerpo+="<meta charset = \"utf -8\">\n";
+            Cuerpo+="<title> Tabla de Erroes</title>\n";
+            Cuerpo+="<style>td{ border-bottom: 1px solid black;}</style>";
+            Cuerpo+="</head>\n";
+            Cuerpo+="<body bgcolor=#000>\n";
+            Cuerpo+="<table align = \"center\" style = \"width:80% ; font-family: consolas; background-color: #ffd868;\">\n";
+            Cuerpo+="<tr bgcolor = \"4C868A\" ><td colspan = 5 align = \"center\" ><h2> Tabla de Errores</h2></td></tr>\n";
+            Cuerpo+="<tr bgcolor = \"4C868A\" style=\"color:#FFFF;\"><td align = \"center\">No.</td><td align = \"center\">Tipo de Error</td><td align = \"center\">Línea</td><td align = \"center\">Columna</td><td align = \"center\">Descripción</td></tr>\n";
+            Cuerpo+=TablaErrores;
+            Cuerpo+="</table>\n";
+            Cuerpo+="</body>\n";
+            Cuerpo+="</html>\n";
+            ArchivoSalida.innerHTML = Cuerpo;    
+            var DownloadLink = document.getElementById("downloadFile");
+            var newFile = new File([Cuerpo], "ERRORES.html");
+            var direccion = window.URL.createObjectURL(newFile);
+            DownloadLink.href = direccion;
+            DownloadLink.download = "ERRORES.html";
             DownloadLink.click();
         }
     </script>
@@ -549,9 +580,9 @@
                           </svg>
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#" onclick="printPython()">Reportes</a>
+                        <a class="dropdown-item" href="#" onclick="PrintTrees()">Generar AST</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#" onclick="printHTML()">Salida HTML</a>
+                        <a class="dropdown-item" href="#" onclick="SaveErrorFile()">Reporte de Errores</a>
                     </div>
                 </li>
             </ul>

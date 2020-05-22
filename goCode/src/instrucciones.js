@@ -77,8 +77,8 @@ const instruccionesAPI = {
     },
     nuevaCondicion: function(logica) {
         return {
-            tipo: TIPO_OPERACIONES.CONDICION,
-            logica: logica
+            // tipo: TIPO_OPERACIONES.CONDICION,
+            expresion: logica
         };
     },
     nuevoImprimir: function(cadena) {

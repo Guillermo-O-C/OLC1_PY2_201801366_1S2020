@@ -32,7 +32,7 @@
 "print" return 'R_PRINT';
 "println" return 'R_PRINTLN';
 
-\"([^\"])*\" { yytext = yytext.substr(1, yyleng-2); return 'CADENA';}
+\"(\\\"|\\n|\\t|\\r|\\\\|[^\"])*\" { yytext = yytext.substr(1, yyleng-2); return 'CADENA';}
 \'[^\"]?\' { yytext = yytext.substr(1, yyleng-2); return 'CARACTER';}
 [0-9]+("."[0-9]+)?\b return 'DECIMAL';
 [0-9]+\b return 'ENTERO';
@@ -71,7 +71,7 @@
 
 <<EOF>>                 return 'EOF';
 
-.                       { console.error('Este es un error léxico: ' + yytext + ', en la linea: ' + yylloc.first_line + ', en la columna: ' + yylloc.first_column); salida.push('Este es un error léxico: ' + yytext + ', en la linea: ' + yylloc.first_line + ', en la columna: ' + yylloc.first_column);}
+.                       { console.error('Este es un error léxico: ' + yytext + ', en la linea: ' + yylloc.first_line + ', en la columna: ' + yylloc.first_column); salida.push('Este es un error léxico: ' + yytext + ', en la linea: ' + yylloc.first_line + ', en la columna: ' + yylloc.first_column);  ArrayDeErrores.push({tipo:"léxico", linea:this._$.first_line, columna:this._$.first_column, descripcion: yytext});}
 /lex
 
 
@@ -96,6 +96,7 @@
 	var CurrentVarType="";
 	var FunctionID="";
 	var isFunction = true;
+	var ArrayDeErrores = [];
 %}
 
 /* Asociación de operadores y precedencia */
@@ -115,7 +116,9 @@ ini
 		salida=[];
 		var sentClass = Clases;
 		Clases = [];
-		return {AST: $1, Errores: temporal, Cuerpo:sentClass};
+		var tempAr = ArrayDeErrores;
+		ArrayDeErrores = [];
+		return {AST: $1, Errores: temporal, Cuerpo:sentClass, ArrayOfErrors:tempAr };
 	}
 ;
 instrucciones
@@ -125,7 +128,7 @@ instrucciones
 instruccion
    	: R_IMPORT IDENTIFICADOR PUNTO_COMA { $$ = instruccionesAPI.nuevoImport($2);}
 	| R_CLASS IDENTIFICADOR ABRIR_LLAVE classBody  CERRAR_LLAVE {$$=instruccionesAPI.nuevaClase($2, $4); Clases.push(new Clase($2, Funciones)); Funciones=[];}
-   	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
+   	| error  { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); ArrayDeErrores.push({tipo:"sintáctico", linea:this._$.first_line, columna:this._$.first_column, descripcion: yytext});}
 ;
 classBody
 	: classBody classActions { $1.push($2); $$ = $1; }
@@ -170,7 +173,7 @@ sentencias
 ;
 sentencia
 	: declaracion_var { $$ = $1; }
-	| IDENTIFICADOR IGUAL expresion PUNTO_COMA {$$ = instruccionesAPI.nuevaAsignacion($1, $3);}
+	| IDENTIFICADOR IGUAL condicion PUNTO_COMA {$$ = instruccionesAPI.nuevaAsignacion($1, $3);}
 	| IDENTIFICADOR ABRIR_PARENTESIS argumentos CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevaLlamada($1, $3);}
 	| IDENTIFICADOR INCREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoIncremento($1);}
 	| IDENTIFICADOR DECREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoDecremento($1);}
@@ -182,7 +185,7 @@ sentencia
 	| R_SYSTEM PUNTO R_OUT PUNTO R_PRINT  ABRIR_PARENTESIS expresion CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevoImprimir($7);}
 	| R_SYSTEM PUNTO R_OUT PUNTO R_PRINTLN  ABRIR_PARENTESIS expresion CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevoImprimir($7);}
 	| R_RETURN condicion PUNTO_COMA{$$=instruccionesAPI.nuevoReturnFuncion($2);}
-   	| error PUNTO_COMA{ console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
+   	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);  ArrayDeErrores.push({tipo:"sintáctico", linea:this._$.first_line, columna:this._$.first_column, descripcion: yytext});}
 	
 ;
 elseIf
@@ -199,7 +202,7 @@ sentenciasBreak
 ;
 sentenciaBreak
 	: declaracion_var { $$ = $1; }
-	| IDENTIFICADOR IGUAL expresion PUNTO_COMA {$$ = instruccionesAPI.nuevaAsignacion($1, $3);}
+	| IDENTIFICADOR IGUAL condicion PUNTO_COMA {$$ = instruccionesAPI.nuevaAsignacion($1, $3);}
 	| IDENTIFICADOR ABRIR_PARENTESIS argumentos CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevaLlamada($1, $3);}
 	| IDENTIFICADOR INCREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoIncremento($1);}
 	| IDENTIFICADOR DECREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoDecremento($1);}
@@ -213,7 +216,7 @@ sentenciaBreak
 	| R_BREAK PUNTO_COMA {$$=$1;}
 	| R_CONTINUE PUNTO_COMA {$$=$1;}
 	| R_RETURN condicion PUNTO_COMA{$$=instruccionesAPI.nuevoReturnFuncion($2);}
-	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
+	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);  ArrayDeErrores.push({tipo:"sintáctico", linea:this._$.first_line, columna:this._$.first_column, descripcion: yytext});}
 
 ;
 elseIfBreak
@@ -241,7 +244,7 @@ sentenciasVoid
 ;
 sentenciaVoid
 	: declaracion_var { $$ = $1; }
-	| IDENTIFICADOR IGUAL expresion PUNTO_COMA {$$ = instruccionesAPI.nuevaAsignacion($1, $3);}
+	| IDENTIFICADOR IGUAL condicion PUNTO_COMA {$$ = instruccionesAPI.nuevaAsignacion($1, $3);}
 	| IDENTIFICADOR ABRIR_PARENTESIS argumentos CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevaLlamada($1, $3);}
 	| IDENTIFICADOR INCREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoIncremento($1);}
 	| IDENTIFICADOR DECREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoDecremento($1);}
@@ -253,7 +256,7 @@ sentenciaVoid
 	| R_SYSTEM PUNTO R_OUT PUNTO R_PRINT  ABRIR_PARENTESIS expresion CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevoImprimir($7);}
 	| R_SYSTEM PUNTO R_OUT PUNTO R_PRINTLN  ABRIR_PARENTESIS expresion CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevoImprimir($7);}
 	| R_RETURN PUNTO_COMA {$$=$1;}  
-	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
+	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);  ArrayDeErrores.push({tipo:"sintáctico", linea:this._$.first_line, columna:this._$.first_column, descripcion: yytext});} 
 ;
 elseIfVoid
 	: R_ELSE elseIf_PVoid { $$ = $2;}
@@ -269,7 +272,7 @@ sentenciasVoidBreak
 ;
 sentenciaVoidBreak
 	: declaracion_var { $$ = $1; }
-	| IDENTIFICADOR IGUAL expresion PUNTO_COMA {$$ = instruccionesAPI.nuevaAsignacion($1, $3);}
+	| IDENTIFICADOR IGUAL condicion PUNTO_COMA {$$ = instruccionesAPI.nuevaAsignacion($1, $3);}
 	| IDENTIFICADOR ABRIR_PARENTESIS argumentos CERRAR_PARENTESIS PUNTO_COMA {$$ = instruccionesAPI.nuevaLlamada($1, $3);}
 	| IDENTIFICADOR INCREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoIncremento($1);}
 	| IDENTIFICADOR DECREMENTO PUNTO_COMA {$$ =  instruccionesAPI.nuevoDecremento($1);}
@@ -283,7 +286,7 @@ sentenciaVoidBreak
 	| R_BREAK PUNTO_COMA {$$=$1;}
 	| R_CONTINUE PUNTO_COMA {$$=$1;}
 	| R_RETURN PUNTO_COMA {$$=$1;}
-	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
+	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);	salida.push('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);  ArrayDeErrores.push({tipo:"sintáctico", linea:this._$.first_line, columna:this._$.first_column, descripcion: yytext});}
 
 ;
 elseIfVoidBreak
@@ -338,7 +341,7 @@ listaID_P
 	| {$$="NM";}
 ;
 defincion_var
-	: IGUAL expresion { $$ = $2; }
+	: IGUAL condicion { $$ = $2; }
 	| { $$ = "sin inicializar"; }
 ;
 expresion
@@ -349,7 +352,7 @@ expresion
 	| expresion DIVISION expresion	{ $$ = instruccionesAPI.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.DIVISION); }
 	| ABRIR_PARENTESIS expresion CERRAR_PARENTESIS					{ $$ = $2; }
 	| ENTERO											{ $$ = instruccionesAPI.nuevoValor(Number($1), TIPO_VALOR.NUMERO); }
-	| DECIMAL											{ $$ = instruccionesAPI.nuevoValor(Number($1), TIPO_VALOR.NUMERO); }
+	| DECIMAL											{ $$ = instruccionesAPI.nuevoValor(Number($1), TIPO_VALOR.DECIMAL); }
 	| IDENTIFICADOR										{ $$ = instruccionesAPI.nuevoValor($1, TIPO_VALOR.IDENTIFICADOR); }
 	| IDENTIFICADOR	ABRIR_PARENTESIS argumentos CERRAR_PARENTESIS { $$ = instruccionesAPI.nuevaLlamada($1, $3); }
 	| CARACTER											{ $$ = instruccionesAPI.nuevoValor($1, TIPO_VALOR.CARACTER); }
