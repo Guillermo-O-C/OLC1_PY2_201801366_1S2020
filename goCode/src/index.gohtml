@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="jsonview.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    {{/* <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> */}}
+   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -155,49 +155,48 @@
     </script>
     <script>
         var button = '<button class="close" type="button" title="Remove this page">×</button>';
-        var tabID = 1;
-
-        function resetTab() {
-            var tabs = $("#tab-list li:not(:first)");
-            var len = 1
-            $(tabs).each(function(k, v) {
-                len++;
-                $(this).find('a').html('Tab ' + len + button);
-            })
-            tabID--;
-        }
-        $(document).ready(function() {
-            $('#btn-add-tab').click(function() {
-                tabID++;
-                $('#tab-list').append($('<li><a href="#tab' + tabID + '" role="tab" data-toggle="tab" type="button" class="btn btn-info" style="margin-right: 1px;"><span>Tab ' + tabID + '</span> <span class="glyphicon glyphicon-pencil text-muted edit"></span> <button class="close" type="button" title="Remove this page">×</button></a></li>'));
-                $('#tab-content').append($('<div class="tab-pane fade" id="tab' + tabID + '"><div id="left"><textarea style="background: url(http://i.imgur.com/2cOaJ.png);background-color: #f1f1f1;background-attachment: local;background-repeat: no-repeat;padding-left: 35px;padding-top: 10px;border-color:#ccc;color: rgb(0, 0, 0); font-size: smaller;"id="entrada' + tabID + '" class="entrada"></textarea><button class="boton" onclick="EnviarEntrada(entrada' + tabID + '.value, consola1, consola2, consola3, variables);">Analizar Entrada</button></div>'));
-                $(".edit").click(editHandler);
-            });
-
-            $('#tab-list').on('click', '.close', function() {
-                var tabID = $(this).parents('a').attr('href');
-                $(this).parents('li').remove();
-                $(tabID).remove();
-
-                //display first tab
-                var tabFirst = $('#tab-list a:first');
-                resetTab();
-                tabFirst.tab('show');
-            });
-
-            var list = document.getElementById("tab-list");
-        });
-
-        var editHandler = function() {
-            var t = $(this);
-            t.css("visibility", "hidden");
-            $(this).prev().attr("contenteditable", "true").focusout(function() {
-                $(this).removeAttr("contenteditable").off("focusout");
-                t.css("visibility", "visible");
-            });
-        };
-
-        $(".edit").click(editHandler);
+       var tabID = 1;
+           function resetTab(){
+               var tabs=$("#tab-list li:not(:first)");
+               var len=1
+               $(tabs).each(function(k,v){
+                   len++;
+                   $(this).find('a').html('Tab ' + len + button);
+               })
+               tabID--;
+           }           
+           $(document).ready(function() {
+               $('#btn-add-tab').click(function() {
+                   tabID++;
+                   $('#tab-list').append($('<li><a href="#tab' + tabID + '" role="tab" data-toggle="tab" type="button" class="btn btn-info" style="margin-right: 1px;"><span>Tab ' + tabID + '</span> <span class="glyphicon glyphicon-pencil text-muted edit"></span> <button class="close" type="button" title="Remove this page">×</button></a></li>'));
+                   $('#tab-content').append($('<div class="tab-pane fade" id="tab' + tabID + '"> <div><textarea id="entrada' + tabID + '" name="entrada' + tabID + '" class="entrada" style="width:100%; height:80%;"></textarea>                    </div></div>'));
+                   $(".edit").click(editHandler);
+               });
+               
+               $('#tab-list').on('click', '.close', function() {
+                   var tabID = $(this).parents('a').attr('href');
+                   $(this).parents('li').remove();
+                   $(tabID).remove();
+           
+                   //display first tab
+                   var tabFirst = $('#tab-list a:first');
+                   resetTab();
+                   tabFirst.tab('show');
+               });
+           
+               var list = document.getElementById("tab-list");
+           });
+           
+           var editHandler = function() {
+             var t = $(this);
+             t.css("visibility", "hidden");
+             $(this).prev().attr("contenteditable", "true").focusout(function() {
+               $(this).removeAttr("contenteditable").off("focusout");
+               t.css("visibility", "visible");
+             });
+           };
+           
+           $(".edit").click(editHandler);
     </script>
     <script>
         function printPython() {
@@ -240,8 +239,9 @@
         }
     </script>
     
-    <script>
+     <script>
         var AST_COLLECTION;
+        var Copias;
         function DataMessenger() {
             const output = "";
             AST_COLLECTION =[];
@@ -255,13 +255,13 @@
                     var p = AST_COLLECTION[0];
                     p = JSON.parse(p);
                     console.log(p);
-                    console.log(p.AST);
                     console.log(p.Errores);
                     document.getElementById('salida').value="";
                     if(p.Errores=="undefined"){
                          document.getElementById('salida').value="El analizador no se pudo recuperar del error";
                     }else{
                         if(p.Errores.length==0){
+                            console.log("el ast es " +JSON.stringify(p.AST));
                             document.getElementById('salida').value="El análisis ha finalizado correctamente";
                         }
                         for(var i =0;i<p.Errores.length;i++){
@@ -274,20 +274,65 @@
             xml.send(JSON.stringify({
                 original: text
             }));
+        }   
+        var SinErrores = true; 
+        var OriginalAST;
+        function AnalizarCopias() {
+            OriginalAST = JSON.parse(AST_COLLECTION[0]).Cuerpo;
+            Copias =[];
+            SinErrores = true;
+            document.getElementById('salida').value="";
+            for(var i =1;i<=tabID;i++){
+                var els = document.querySelectorAll("a[href='#tab" + i + "']");                
+                EjecutarAnalisis(document.getElementById('entrada' + i).value, i, els[0].textContent);
+            }
+            if(SinErrores){
+                VerificarCopias();
+            }
+        }
+        VerificarCopias(){
+            for(var i =0;i<Copias.length;i++){
+                
+            }
+        }
+        function EjecutarAnalisis(entry, numero, nombre){
+            var xml = new XMLHttpRequest();
+            xml.open("POST", "http://localhost:3000/analizar", true);
+            xml.setRequestHeader('Content-Type', 'application/json');
+            xml.onreadystatechange = function() {
+                if (xml.readyState == XMLHttpRequest.DONE) {
+                   // alert("yasta");
+                    Copias.push(xml.responseText);
+                    var p = Copias[Copias.length-1];
+                    p = JSON.parse(p);
+                    console.log(p);
+                    console.log(p.Errores);
+                    if(p.Errores=="undefined"){
+                        SinErrores=false;
+                         document.getElementById('salida').value+="El analizador no se pudo recuperar del error en el archivo "+nombre;
+                    }else{
+                        if(p.Errores.length==0){
+                        SinErrores=false;
+                            console.log("el ast es " +JSON.stringify(p.AST));
+                            document.getElementById('salida').value+="El análisis del archivo "+nombre+" ha finalizado correctamente";
+                        }else{
+                        document.getElementById('salida').value+="Los errores del archivo "+nombre+" son:\n";
+                        for(var i =0;i<p.Errores.length;i++){
+                            document.getElementById('salida').value+=p.Errores[i]+"\n";
+                        }
+                        }
+                        
+                    }
+                }
+            }
+            xml.send(JSON.stringify({
+                original: entry
+            }));
         }
         function PrintAST(dataStr) {  
             var tree = document.createElement('script');
             tree.innerHTML = "function myFunction(){let data = \'"+dataStr+"\'; let target = '.root'; jsonView.format(data, target);}";
-            var content=document.getElementById('scripts').value;/*
-            alert(content);
-            var win = window.open("", "newWindow", "width=400, height=200");
-            var head = document.createElement('head');
-            head.outerHTML="<head>"+content+tree.outerHTML+"</head>";
-            win.document.head.outerHTML = head.outerHTML;
-            win.document.body.onload="myFunction();";
-            win.document.body.innerHTML = '<div class="root"></div>';*/
-            //win.document.innerHTML.write('<html><head>'+content+tree.outerHTML+'</head><body onload="myFunction()"><div class="root"></div></body></html>');
-            console.log("<html><head>"+content+tree.outerHTML+"</head><body onload=\"myFunction()\"><div class=\"root\"></div></body></html>");
+            var content=document.getElementById('scripts').value;console.log("<html><head>"+content+tree.outerHTML+"</head><body onload=\"myFunction()\"><div class=\"root\"></div></body></html>");
             var DownloadLink = document.getElementById("downloadFile");
             var newFile = new File(["<html><head>"+content+tree.outerHTML+"</head><body onload=\"myFunction()\"><div class=\"root\"></div></body></html>"], "SalidaPython.py");
             var direccion = window.URL.createObjectURL(newFile);
@@ -296,9 +341,8 @@
             DownloadLink.click();
         }
         function PrintTrees(){
-            for (var i =0; i <AST_COLLECTION.length;i++){
-                PrintAST(JSON.stringify(JSON.parse(AST_COLLECTION[i]).AST));
-            }
+            console.log(AST_COLLECTION[0]);
+            PrintAST(JSON.stringify(JSON.parse(AST_COLLECTION[0]).AST));
         }
     </script>
     <script>
@@ -389,7 +433,8 @@
                 </div>
             </div>
         </div>
-        <button class="boton" onclick="DataMessenger();">Ejecutar Análisis</button>
+        <button class="boton" onclick="DataMessenger();" style="margin-left:25%;">Analizar Archivo Original</button>
+        <button class="boton" onclick="AnalizarCopias();" style="margin-left:6%;">Analziar Copias</button>
         <div class="down">
             <textarea class="salida" name="salida" id="salida" disabled></textarea>
         </div>

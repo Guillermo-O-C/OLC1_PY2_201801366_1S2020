@@ -32,7 +32,7 @@
 "print" return 'R_PRINT';
 "println" return 'R_PRINTLN';
 
-\"([^\"]|\\"n"|\\"t"|\\"r"|\\\\|\\\")*\" { yytext = yytext.substr(1, yyleng-2); return 'CADENA';}
+\"([^\"])*\" { yytext = yytext.substr(1, yyleng-2); return 'CADENA';}
 \'[^\"]?\' { yytext = yytext.substr(1, yyleng-2); return 'CARACTER';}
 [0-9]+("."[0-9]+)?\b return 'DECIMAL';
 [0-9]+\b return 'ENTERO';
