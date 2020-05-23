@@ -209,7 +209,7 @@
                 var newFile = new File([TextFile.value], NewDocumentName + ".java");
                 var direccion = window.URL.createObjectURL(newFile);
                 DownloadLink.href = direccion;
-                DownloadLink.download = NewDocumentName + ".cs";
+                DownloadLink.download = NewDocumentName + ".java";
                 DownloadLink.click();
             }
 
