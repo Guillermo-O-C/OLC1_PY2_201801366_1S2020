@@ -199,37 +199,14 @@
            $(".edit").click(editHandler);
     </script>
     <script>
-        function printPython() {
-            var DownloadLink = document.getElementById("downloadFile");
-            var newFile = new File([consola1.value], "SalidaPython.py");
-            var direccion = window.URL.createObjectURL(newFile);
-            DownloadLink.href = direccion;
-            DownloadLink.download = "SalidaPython.py";
-            DownloadLink.click();
-        }
-
-        function printHTML() {
-            var DownloadLink = document.getElementById("downloadFile");
-            var newFile = new File([consola2.value], "SalidaHTML.html");
-            var direccion = window.URL.createObjectURL(newFile);
-            DownloadLink.href = direccion;
-            DownloadLink.download = "SalidaHTML.html";
-            DownloadLink.click();
-        }
-
         function SaveFile() {
             var NewDocumentName = prompt("Ingresa el nombre del nuevo documento");
             if (NewDocumentName == "" || NewDocumentName == null) {
                 alert("No se ha guardado el archivo.");
             } else {
                 var DownloadLink = document.getElementById("downloadFile");
-                if (tabID == 1) {
-                    var TextFile = document.getElementById("entrada");
-                    var newFile = new File([TextFile.value], NewDocumentName + ".cs");
-                } else {
-                    var TextFile = document.getElementById("entrada" + tabID);
-                    var newFile = new File([TextFile.value], NewDocumentName + ".cs");
-                }
+                var TextFile = document.getElementById("original");
+                var newFile = new File([TextFile.value], NewDocumentName + ".java");
                 var direccion = window.URL.createObjectURL(newFile);
                 DownloadLink.href = direccion;
                 DownloadLink.download = NewDocumentName + ".cs";
@@ -429,7 +406,8 @@
             if(parametros=="") parametros="Sin parámetros";
             FuncionCopiada.parametros =  parametros;
             CopiasDetectadas.push(FuncionCopiada);
-            TablaCopia+="<tr><td rowspan=3>FUNCIÓN</td><td> Tipo de Retorno: "+funcion.tipo+"</td></tr>";
+            TablaCopia+="<tr><td rowspan=4>FUNCIÓN</td><td>Clase: "+clase.id+"</td></tr>";
+            TablaCopia+="<tr><td> Tipo de Retorno: "+funcion.tipo+"</td></tr>";
             TablaCopia+="<tr><td>Nombre: "+funcion.id+"</td></tr>";
             TablaCopia+="<tr><td>Parámetros: "+parametros+"</td></tr>";
         }
